@@ -43,29 +43,193 @@ animate();
 
 const audio = document.getElementById('bgAudio');
 const audioBtn = document.getElementById('audioToggle');
+const currentTrackEl = document.getElementById('currentTrack');
+const playlistStatus = document.getElementById('playlistStatus');
+const playlistTracks = document.getElementById('playlistTracks');
+const trackCounter = document.getElementById('trackCounter');
+const prevTrackBtn = document.getElementById('prevTrack');
+const nextTrackBtn = document.getElementById('nextTrack');
+
+const tracks = [
+    {
+        title: 'Музыка с крыши',
+        subtitle: 'ROOF SCENE',
+        src: 'roof_music.mp3'
+    },
+    {
+        title: 'Тёмные коридоры',
+        subtitle: 'DARK CORRIDORS',
+        src: 'dark_corridors.mp3'
+    },
+    {
+        title: 'Наше воспоминание',
+        subtitle: 'SECRET MEMORY',
+        src: 'our_memory.mp3'
+    }
+];
+
+let currentTrackIndex = 0;
+let playbackRequest = 0;
+
+function formatTrackNumber(number) {
+    return String(number).padStart(2, '0');
+}
+
+function renderPlaylist() {
+    playlistTracks.replaceChildren();
+
+    tracks.forEach((track, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'playlist-track';
+        button.setAttribute('aria-label', `Включить: ${track.title}`);
+
+        const number = document.createElement('span');
+        number.className = 'playlist-track-number';
+        number.textContent = formatTrackNumber(index + 1);
+
+        const info = document.createElement('span');
+        info.className = 'playlist-track-info';
+
+        const title = document.createElement('span');
+        title.className = 'playlist-track-title';
+        title.textContent = track.title;
+
+        const subtitle = document.createElement('span');
+        subtitle.className = 'playlist-track-subtitle';
+        subtitle.textContent = track.subtitle;
+
+        const icon = document.createElement('span');
+        icon.className = 'playlist-track-icon';
+        icon.textContent = '►';
+        icon.setAttribute('aria-hidden', 'true');
+
+        info.append(title, subtitle);
+        button.append(number, info, icon);
+
+        button.addEventListener('click', () => {
+            if (index === currentTrackIndex) {
+                toggleAudio();
+            } else {
+                selectTrack(index, true);
+            }
+        });
+
+        playlistTracks.append(button);
+    });
+
+    updatePlaylist();
+}
+
+function updatePlaylist() {
+    const playing = !audio.paused && !audio.ended;
+
+    currentTrackEl.textContent = tracks[currentTrackIndex].title;
+
+    trackCounter.textContent =
+        `${formatTrackNumber(currentTrackIndex + 1)} / ` +
+        formatTrackNumber(tracks.length);
+
+    audioBtn.textContent = playing ? '❚❚ ПАУЗА' : '► ВКЛЮЧИТЬ';
+
+    audioBtn.style.borderColor = playing
+        ? 'var(--accent-cyan)'
+        : 'var(--accent-red)';
+
+    audioBtn.style.color = playing
+        ? 'var(--accent-cyan)'
+        : 'var(--accent-red)';
+
+    playlistStatus.textContent = playing
+        ? 'ВОСПРОИЗВЕДЕНИЕ'
+        : 'ОЖИДАНИЕ';
+
+    playlistStatus.classList.toggle('is-playing', playing);
+
+    Array.from(playlistTracks.children).forEach((button, index) => {
+        const active = index === currentTrackIndex;
+
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-current', active ? 'true' : 'false');
+
+        button.querySelector('.playlist-track-icon').textContent =
+            active && playing ? '❚❚' : '►';
+    });
+}
+
+async function playCurrentTrack() {
+    const requestId = ++playbackRequest;
+
+    try {
+        await audio.play();
+
+        if (requestId === playbackRequest) {
+            updatePlaylist();
+        }
+    } catch (error) {
+        if (
+            requestId !== playbackRequest ||
+            error.name === 'AbortError'
+        ) {
+            return;
+        }
+
+        updatePlaylist();
+        playlistStatus.textContent = 'ОШИБКА АУДИО';
+
+        console.error('Ошибка воспроизведения:', error);
+
+        alert(
+            `Не удалось включить трек «${tracks[currentTrackIndex].title}». ` +
+            `Проверь файл "${tracks[currentTrackIndex].src}" в папке с сайтом.`
+        );
+    }
+}
+
+function selectTrack(index, autoplay = false) {
+    playbackRequest++;
+    audio.pause();
+
+    currentTrackIndex = (index + tracks.length) % tracks.length;
+    audio.src = tracks[currentTrackIndex].src;
+    audio.load();
+
+    updatePlaylist();
+
+    if (autoplay) {
+        playCurrentTrack();
+    }
+}
 
 function toggleAudio() {
     if (audio.paused) {
-        audio.play()
-            .then(() => {
-                audioBtn.innerText = '❚❚ ПАУЗА';
-                audioBtn.style.borderColor = 'var(--accent-cyan)';
-                audioBtn.style.color = 'var(--accent-cyan)';
-            })
-            .catch(err => {
-                console.error('Ошибка воспроизведения:', err);
-                alert(
-                    "Не удалось включить музыку. Проверь, что файл " +
-                    "'roof_music.mp3' находится в папке с сайтом."
-                );
-            });
+        playCurrentTrack();
     } else {
+        playbackRequest++;
         audio.pause();
-        audioBtn.innerText = '► ВКЛЮЧИТЬ МУЗЫКУ';
-        audioBtn.style.borderColor = 'var(--accent-red)';
-        audioBtn.style.color = 'var(--accent-red)';
+        updatePlaylist();
     }
 }
+
+audioBtn.addEventListener('click', toggleAudio);
+
+prevTrackBtn.addEventListener('click', () => {
+    selectTrack(currentTrackIndex - 1, true);
+});
+
+nextTrackBtn.addEventListener('click', () => {
+    selectTrack(currentTrackIndex + 1, true);
+});
+
+audio.addEventListener('play', updatePlaylist);
+audio.addEventListener('pause', updatePlaylist);
+
+audio.addEventListener('ended', () => {
+    selectTrack(currentTrackIndex + 1, true);
+});
+
+renderPlaylist();
+selectTrack(0);
 
 const messages = [
     '> Сканирование данных... Объект: Анюта.',
