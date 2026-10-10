@@ -55,26 +55,29 @@ const progressBar = document.getElementById('progressBar');
 const currentTimeEl = document.getElementById('currentTime');
 const trackDurationEl = document.getElementById('trackDuration');
 
-/*
- * Треки лежат в папке music/.
- * ВАЖНО: поменяй src на реальные имена файлов из своей папки music!
- * Пример: если файл называется "01 - roof theme.mp3",
- * пиши src: 'music/01 - roof theme.mp3'
- */
+
 const tracks = [
     {
-        title: 'Музыка с крыши',
-        subtitle: 'ROOF SCENE',
-        src: 'music/roof_music.mp3'
+        title: 'Brigeburner',
+        subtitle: 'Bad thigs OST',
+        src: 'music/Bad Things OST - Bridgeburner - 14-2208107384.mp3'
     },
+    
     {
         title: 'Тёмные коридоры',
-        subtitle: 'DARK CORRIDORS',
+        subtitle: 'Bad thigs OST',
         src: 'music/dark_corridors.mp3'
     },
+    
+    {
+        title: 'Тёмные коридоры',
+        subtitle: 'Bad thigs OST',
+        src: 'music/dark_corridors.mp3'
+    },
+    
     {
         title: 'Наше воспоминание',
-        subtitle: 'SECRET MEMORY',
+        subtitle: 'Bad thigs OST',
         src: 'music/our_memory.mp3'
     }
 ];
