@@ -10,62 +10,6 @@
     <script src="script.js" defer></script>
 </head>
 <body>
-    <div class="crt-overlay"></div>
-    <canvas id="bgCanvas"></canvas>
-
-    <div class="container">
-        <div class="playlist-widget">
-            <div class="playlist-header">
-                <span>[ AUDIO_ARCHIVE // ANYUTA ]</span>
-                <span class="playlist-status" id="playlistStatus">
-                    ОЖИДАНИЕ
-                </span>
-            </div>
-
-            <div class="playlist-now">
-                <span class="playlist-label">СЕЙЧАС ВЫБРАНО</span>
-                <div class="playlist-current" id="currentTrack">
-                    Музыка с крыши
-                </div>
-            </div>
-
-            <div class="playlist-controls">
-                <button
-                    class="playlist-control"
-                    id="prevTrack"
-                    type="button"
-                    aria-label="Предыдущий трек"
-                >
-                    ⏮
-                </button>
-
-                <button
-                    class="music-btn playlist-play"
-                    id="audioToggle"
-                    type="button"
-                >
-                    ► ВКЛЮЧИТЬ
-                </button>
-
-                <button
-                    class="playlist-control"
-                    id="nextTrack"
-                    type="button"
-                    aria-label="Следующий трек"
-                >
-                    ⏭
-                </button>
-            </div>
-
-            <div class="playlist-tracks" id="playlistTracks"></div>
-
-            <div class="playlist-footer">
-                <span>BAD THINGS // SOUND COLLECTION</span>
-                <span id="trackCounter">01 / 03</span>
-            </div>
-        </div>
-
-        <audio id="bgAudio" preload="metadata"></audio>
 
         <header>
             <span class="tag">[ ROBLOX // BAD THINGS MEMORIES ]</span>
@@ -156,6 +100,64 @@
                 [ РАСШИФРОВАТЬ ]
             </button>
         </div>
+
+        <div class="crt-overlay"></div>
+    <canvas id="bgCanvas"></canvas>
+
+    <div class="container">
+        <div class="playlist-widget">
+            <div class="playlist-header">
+                <span>[ AUDIO_ARCHIVE // ANYUTA ]</span>
+                <span class="playlist-status" id="playlistStatus">
+                    ОЖИДАНИЕ
+                </span>
+            </div>
+
+            <div class="playlist-now">
+                <span class="playlist-label">СЕЙЧАС ВЫБРАНО</span>
+                <div class="playlist-current" id="currentTrack">
+                    Музыка с крыши
+                </div>
+            </div>
+
+            <div class="playlist-controls">
+                <button
+                    class="playlist-control"
+                    id="prevTrack"
+                    type="button"
+                    aria-label="Предыдущий трек"
+                >
+                    ⏮
+                </button>
+
+                <button
+                    class="music-btn playlist-play"
+                    id="audioToggle"
+                    type="button"
+                >
+                    ► ВКЛЮЧИТЬ
+                </button>
+
+                <button
+                    class="playlist-control"
+                    id="nextTrack"
+                    type="button"
+                    aria-label="Следующий трек"
+                >
+                    ⏭
+                </button>
+            </div>
+
+            <div class="playlist-tracks" id="playlistTracks"></div>
+
+            <div class="playlist-footer">
+                <span>BAD THINGS // SOUND COLLECTION</span>
+                <span id="trackCounter">01 / 03</span>
+            </div>
+        </div>
+
+        <audio id="bgAudio" preload="metadata"></audio>
+
 
         <footer>
             <p>MADE ESPECIALLY FOR ANYUTA // BAD THINGS CO-OP ARCHIVE</p>
