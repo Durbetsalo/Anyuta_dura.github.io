@@ -14,21 +14,58 @@
     <canvas id="bgCanvas"></canvas>
 
     <div class="container">
-        <div class="audio-widget">
-            <div class="audio-info">
-                <span>[AUDIO_TRACK] Я добавил музыку из того эпизода на крыше</span>
+        <div class="playlist-widget">
+            <div class="playlist-header">
+                <span>[ AUDIO_ARCHIVE // ANYUTA ]</span>
+                <span class="playlist-status" id="playlistStatus">
+                    ОЖИДАНИЕ
+                </span>
             </div>
 
-            <button
-                class="music-btn"
-                id="audioToggle"
-                onclick="toggleAudio()"
-            >
-                ► ВКЛЮЧИТЬ МУЗЫКУ
-            </button>
+            <div class="playlist-now">
+                <span class="playlist-label">СЕЙЧАС ВЫБРАНО</span>
+                <div class="playlist-current" id="currentTrack">
+                    Музыка с крыши
+                </div>
+            </div>
+
+            <div class="playlist-controls">
+                <button
+                    class="playlist-control"
+                    id="prevTrack"
+                    type="button"
+                    aria-label="Предыдущий трек"
+                >
+                    ⏮
+                </button>
+
+                <button
+                    class="music-btn playlist-play"
+                    id="audioToggle"
+                    type="button"
+                >
+                    ► ВКЛЮЧИТЬ
+                </button>
+
+                <button
+                    class="playlist-control"
+                    id="nextTrack"
+                    type="button"
+                    aria-label="Следующий трек"
+                >
+                    ⏭
+                </button>
+            </div>
+
+            <div class="playlist-tracks" id="playlistTracks"></div>
+
+            <div class="playlist-footer">
+                <span>BAD THINGS // SOUND COLLECTION</span>
+                <span id="trackCounter">01 / 03</span>
+            </div>
         </div>
 
-        <audio id="bgAudio" loop src="roof_music.mp3"></audio>
+        <audio id="bgAudio" preload="metadata"></audio>
 
         <header>
             <span class="tag">[ ROBLOX // BAD THINGS MEMORIES ]</span>
@@ -111,7 +148,11 @@
                 &gt; Нажми кнопку ниже, чтобы запустить расшифровку тайного файла...
             </div>
 
-            <button class="btn" onclick="revealSecret()">
+            <button
+                class="btn"
+                type="button"
+                onclick="revealSecret()"
+            >
                 [ РАСШИФРОВАТЬ ]
             </button>
         </div>
