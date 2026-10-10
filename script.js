@@ -41,8 +41,6 @@ function animate() {
 
 animate();
 
-/* ===== ПЛЕЙЛИСТ // АУДИО ИЗ ПАПКИ music/ ===== */
-
 const audio = document.getElementById('bgAudio');
 const audioBtn = document.getElementById('audioToggle');
 const currentTrackEl = document.getElementById('currentTrack');
@@ -64,22 +62,107 @@ const tracks = [
     },
     
     {
-        title: 'Тёмные коридоры',
+        title: 'Evening',
         subtitle: 'Bad thigs OST',
-        src: 'music/dark_corridors.mp3'
+        src: 'music/Bad Things OST - Evening - 17-2208109511.mp3'
     },
     
     {
-        title: 'Тёмные коридоры',
+        title: 'Fighter',
         subtitle: 'Bad thigs OST',
-        src: 'music/dark_corridors.mp3'
+        src: 'music/Bad Things OST - Fighter - 3-2208102146.mp3'
     },
-    
-    {
-        title: 'Наше воспоминание',
+
+        {
+        title: 'Ivans Song',
         subtitle: 'Bad thigs OST',
-        src: 'music/our_memory.mp3'
-    }
+        src: 'music/Bad Things OST - Ivans Song - 18-2208110267.mp3'
+    },
+
+        {
+        title: 'Malignant',
+        subtitle: 'Bad thigs OST',
+        src: 'music/Bad Things OST - Malignant - 7-2208105479.mp3'
+    },
+
+        {
+        title: 'Lockers',
+        subtitle: 'Bad thigs OST',
+        src: 'music/tmpscdl_0f49dhvetmp5e71vmdwBad_Things_OST_Lockers_4_2208103838.mp3'
+    },
+
+        {
+        title: 'Saint Augustine',
+        subtitle: 'Bad thigs OST',
+        src: 'music/tmpscdl_1s1_6savtmpele7xx3_Bad_Things_OST_Saint_Augustine_8.mp3'
+    },
+
+            {
+        title: 'Shortwave',
+        subtitle: 'Bad thigs OST',
+        src: 'music/tmpscdl_2ex3_80qtmpdzc5bezyBad_Things_OST_Shortwave_2_2208101723.mp3'
+    },
+
+            {
+        title: 'watch out, here i',
+        subtitle: 'Bad thigs OST',
+        src: 'music/tmpscdl_572apvo_tmpm50tria2Bad_Things_OST_watch_out,_here_i.mp3'
+    },
+
+            {
+        title: 'there it goes',
+        subtitle: 'Bad thigs OST',
+        src: 'music/tmpscdl_6zl4b13ctmpx0nw48p_Bad_Things_OST_there_it_goes_6_2208104267.mp3'
+    },
+
+            {
+        title: 'No More Running',
+        subtitle: 'Bad thigs OST',
+        src: 'music/tmpscdl_8m3_r0bttmpinneju2zBad_Things_OST_No_More_Running_15.mp3'
+    },
+
+            {
+        title: 'made by Andrew',
+        subtitle: 'Bad thigs OST',
+        src: 'music/tmpscdl_9f8l6t44tmphvasxgj7Bad_Things_OST_made_by_Andrew_13.mp3'
+    },
+
+            {
+        title: 'Bloody Knuckles',
+        subtitle: 'Bad thigs OST',
+        src: 'music/tmpscdl_drtpgy7ctmpwuyj8okbBad_Things_OST_Bloody_Knuckles_12.mp3'
+    },
+
+            {
+        title: 'aaaaaannnnnndrreeeeewwwww',
+        subtitle: 'Bad thigs OST',
+        src: 'music/tmpscdl_gydiju2xtmp4bes8vaaBad_Things_OST_aaaaaannnnnndrreeeeewwwww.mp3'
+    },
+
+            {
+        title: 'X80_16',
+        subtitle: 'Bad thigs OST',
+        src: 'music/tmpscdl_hcgz7mytmpl0964eygBad_Things_OST_X80_16_2208109250.mp3'
+    },
+
+            {
+        title: 'Picking Scabs',
+        subtitle: 'Bad thigs OST',
+        src: 'music/tmpscdl_mbrzv1notmp05_7mj29Bad_Things_OST_Picking_Scabs_1_2208101420.mp3'
+    },
+
+            {
+        title: 'there it is',
+        subtitle: 'Bad thigs OST',
+        src: 'music/tmpscdl_tnruc1b9tmpt9iv1uz8Bad_Things_OST_there_it_is_5_2208104021.mp3'
+    },
+
+            {
+        title: 'Hes Here',
+        subtitle: 'Bad thigs OST',
+        src: 'music/tmpscdl_yuoopwi3tmpd2fk1hcqBad_Things_OST_Hes_Here_9_2208105896.mp3'
+    },
+
 ];
 
 let currentTrackIndex = 0;
