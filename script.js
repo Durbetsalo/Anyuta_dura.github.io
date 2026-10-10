@@ -41,6 +41,8 @@ function animate() {
 
 animate();
 
+/* ===== ПЛЕЙЛИСТ // АУДИО ИЗ ПАПКИ music/ ===== */
+
 const audio = document.getElementById('bgAudio');
 const audioBtn = document.getElementById('audioToggle');
 const currentTrackEl = document.getElementById('currentTrack');
@@ -49,30 +51,51 @@ const playlistTracks = document.getElementById('playlistTracks');
 const trackCounter = document.getElementById('trackCounter');
 const prevTrackBtn = document.getElementById('prevTrack');
 const nextTrackBtn = document.getElementById('nextTrack');
+const progressBar = document.getElementById('progressBar');
+const currentTimeEl = document.getElementById('currentTime');
+const trackDurationEl = document.getElementById('trackDuration');
 
+/*
+ * Треки лежат в папке music/.
+ * ВАЖНО: поменяй src на реальные имена файлов из своей папки music!
+ * Пример: если файл называется "01 - roof theme.mp3",
+ * пиши src: 'music/01 - roof theme.mp3'
+ */
 const tracks = [
     {
         title: 'Музыка с крыши',
         subtitle: 'ROOF SCENE',
-        src: 'roof_music.mp3'
+        src: 'music/roof_music.mp3'
     },
     {
         title: 'Тёмные коридоры',
         subtitle: 'DARK CORRIDORS',
-        src: 'dark_corridors.mp3'
+        src: 'music/dark_corridors.mp3'
     },
     {
         title: 'Наше воспоминание',
         subtitle: 'SECRET MEMORY',
-        src: 'our_memory.mp3'
+        src: 'music/our_memory.mp3'
     }
 ];
 
 let currentTrackIndex = 0;
 let playbackRequest = 0;
+let isSeeking = false;
 
 function formatTrackNumber(number) {
     return String(number).padStart(2, '0');
+}
+
+function formatTime(seconds) {
+    if (!isFinite(seconds) || seconds < 0) {
+        return '00:00';
+    }
+
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
 function renderPlaylist() {
@@ -157,6 +180,21 @@ function updatePlaylist() {
     });
 }
 
+function updateProgress() {
+    if (isSeeking) {
+        return;
+    }
+
+    if (audio.duration) {
+        progressBar.value = (audio.currentTime / audio.duration) * 100;
+    } else {
+        progressBar.value = 0;
+    }
+
+    currentTimeEl.textContent = formatTime(audio.currentTime);
+    trackDurationEl.textContent = formatTime(audio.duration);
+}
+
 async function playCurrentTrack() {
     const requestId = ++playbackRequest;
 
@@ -181,7 +219,7 @@ async function playCurrentTrack() {
 
         alert(
             `Не удалось включить трек «${tracks[currentTrackIndex].title}». ` +
-            `Проверь файл "${tracks[currentTrackIndex].src}" в папке с сайтом.`
+            `Проверь файл "${tracks[currentTrackIndex].src}" в папке music.`
         );
     }
 }
@@ -193,6 +231,10 @@ function selectTrack(index, autoplay = false) {
     currentTrackIndex = (index + tracks.length) % tracks.length;
     audio.src = tracks[currentTrackIndex].src;
     audio.load();
+
+    progressBar.value = 0;
+    currentTimeEl.textContent = '00:00';
+    trackDurationEl.textContent = '00:00';
 
     updatePlaylist();
 
@@ -221,6 +263,31 @@ nextTrackBtn.addEventListener('click', () => {
     selectTrack(currentTrackIndex + 1, true);
 });
 
+/* --- Перемотка --- */
+progressBar.addEventListener('input', () => {
+    if (!audio.duration) {
+        return;
+    }
+
+    isSeeking = true;
+    currentTimeEl.textContent =
+        formatTime((progressBar.value / 100) * audio.duration);
+});
+
+progressBar.addEventListener('change', () => {
+    if (!audio.duration) {
+        isSeeking = false;
+        return;
+    }
+
+    audio.currentTime = (progressBar.value / 100) * audio.duration;
+    isSeeking = false;
+    updateProgress();
+});
+
+audio.addEventListener('timeupdate', updateProgress);
+audio.addEventListener('loadedmetadata', updateProgress);
+
 audio.addEventListener('play', updatePlaylist);
 audio.addEventListener('pause', updatePlaylist);
 
@@ -230,6 +297,8 @@ audio.addEventListener('ended', () => {
 
 renderPlaylist();
 selectTrack(0);
+
+/* ===== ТЕРМИНАЛ // ТАЙПИНГ ===== */
 
 const messages = [
     '> Сканирование данных... Объект: Анюта.',
