@@ -140,7 +140,7 @@ const tracks = [
     },
 
             {
-        title: 'X80_16',
+        title: 'X80',
         subtitle: 'Bad thigs OST',
         src: 'music/tmpscdl_hcgz7mytmpl0964eygBad_Things_OST_X80_16_2208109250.mp3'
     },
