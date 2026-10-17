@@ -97,14 +97,25 @@
             </div>
 
             <div class="terminal-actions">
-                <input type="text" id="secretInput" class="secret-input" placeholder="Введите код..." autocomplete="off" spellcheck="false">
-                <button class="btn" type="button" onclick="revealSecret()">
+                <input
+                    type="text"
+                    id="secretInput"
+                    class="terminal-input"
+                    placeholder="Кодовое слово..."
+                    autocomplete="off"
+                    spellcheck="false"
+                    aria-label="Кодовое слово"
+                >
+                <button
+                    class="btn"
+                    type="button"
+                    onclick="revealSecret()"
+                >
                     [ РАСШИФРОВАТЬ ]
                 </button>
             </div>
         </div>
 
-        <!-- ===== ПЛЕЙЛИСТ // В КОНЦЕ СТРАНИЦЫ ===== -->
         <section class="playlist-widget" id="playlist">
             <div class="playlist-header">
                 <span>[ AUDIO_ARCHIVE // ANYUTA ]</span>
