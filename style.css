@@ -650,51 +650,71 @@ footer {
     }
 }
 
-
-/* === НОВЫЙ ДИЗАЙН И HUD ЧЕРНОЙ ДЫРЫ === */
+/* === ЗАТЯГИВАНИЕ В ЧЕРНУЮ ДЫРУ === */
 .suck-element {
     transition-property: transform, opacity, filter !important;
-    transition-timing-function: cubic-bezier(0.55, 0, 0.85, 0.3) !important;
+    transition-timing-function: cubic-bezier(0.55, 0.01, 0.8, 0.3) !important;
     will-change: transform, opacity, filter;
     pointer-events: none !important;
 }
 
-.singularity-hud {
+/* === СТИЛЬНЫЙ DRAINCORE / GLITCH HUD === */
+.drain-hud {
     position: fixed;
-    bottom: 8%;
+    bottom: 6%;
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
     z-index: 1002;
     pointer-events: none;
-    animation: hudFadeIn 1.8s ease-out forwards;
+    animation: drainHudFade 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    white-space: nowrap;
 }
 
-.hud-title {
-    color: var(--accent-cyan);
-    font-size: clamp(14px, 2.5vw, 22px);
-    letter-spacing: 6px;
-    font-weight: bold;
-    text-shadow: 0 0 15px rgba(0, 240, 255, 0.8), 2px 2px var(--accent-red);
+.drain-badge {
+    color: #ff00ff;
+    font-size: clamp(10px, 1.6vw, 13px);
+    letter-spacing: 4px;
     margin-bottom: 6px;
+    text-shadow: 0 0 10px rgba(255, 0, 255, 0.7);
+    font-weight: bold;
 }
 
-.hud-sub {
-    color: var(--accent-red);
-    font-size: clamp(9px, 1.5vw, 12px);
+.drain-title {
+    color: #00ffff;
+    font-size: clamp(16px, 3.2vw, 28px);
+    font-weight: 900;
+    letter-spacing: 7px;
+    text-shadow: 
+        2px 0 #ff00ff, 
+        -2px 0 #ccff00, 
+        0 0 18px rgba(0, 240, 255, 0.7);
+    text-transform: uppercase;
+}
+
+.drain-hint {
+    margin-top: 8px;
+    color: #ccff00;
+    font-size: clamp(9px, 1.4vw, 11px);
     letter-spacing: 3px;
     text-transform: uppercase;
-    text-shadow: 0 0 8px rgba(255, 59, 92, 0.6);
-    animation: pulse 1.8s infinite;
+    text-shadow: 0 0 8px rgba(204, 255, 0, 0.6);
+    opacity: 0.85;
+    animation: pulseHint 2.4s infinite ease-in-out;
 }
 
-@keyframes hudFadeIn {
+@keyframes drainHudFade {
     0% {
         opacity: 0;
-        transform: translate(-50%, 20px) scale(0.9);
+        transform: translate(-50%, 25px) scale(0.92);
     }
     100% {
         opacity: 1;
         transform: translate(-50%, 0) scale(1);
     }
+}
+
+@keyframes pulseHint {
+    0%, 100% { opacity: 0.9; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(0.98); }
 }
