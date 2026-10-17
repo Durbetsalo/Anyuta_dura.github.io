@@ -181,7 +181,7 @@ function formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
 
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    return `\( {String(mins).padStart(2, '0')}: \){String(secs).padStart(2, '0')}`;
 }
 
 function renderPlaylist() {
@@ -414,4 +414,80 @@ function revealSecret() {
     }
 
     typeChar();
+}
+
+let blackHoleTriggered = false;
+
+const secretInput = document.getElementById('secretInput');
+
+secretInput.addEventListener('input', () => {
+    if (blackHoleTriggered) return;
+    if (secretInput.value.trim().toLowerCase() === 'черная дыра') {
+        blackHoleTriggered = true;
+        createBlackHole();
+    }
+});
+
+function createBlackHole() {
+    document.body.classList.add('blackhole-mode');
+
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+
+    const selectors = [
+        'header',
+        '.quote-box',
+        '.card',
+        '.terminal-box',
+        '.playlist-widget',
+        'footer',
+        'canvas#bgCanvas',
+        '.crt-overlay'
+    ];
+
+    const elements = [];
+    selectors.forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => elements.push(el));
+    });
+
+    elements.forEach((el, i) => {
+        const rect = el.getBoundingClientRect();
+        const elCenterX = rect.left + rect.width / 2;
+        const elCenterY = rect.top + rect.height / 2;
+
+        el.classList.add('bh-flying');
+        el.style.left = rect.left + 'px';
+        el.style.top = rect.top + 'px';
+        el.style.width = rect.width + 'px';
+        el.style.height = rect.height + 'px';
+        el.style.transformOrigin = 'center center';
+
+        void el.offsetWidth;
+
+        const dx = centerX - elCenterX;
+        const dy = centerY - elCenterY;
+        const spins = 2 + (i % 3);
+        const angle = spins * 360 * (i % 2 === 0 ? 1 : -1);
+
+        el.style.transform = `translate(${dx}px, \( {dy}px) rotate( \){angle}deg) scale(0.05)`;
+        el.style.opacity = '0';
+        el.style.filter = 'blur(12px) brightness(0.2)';
+    });
+
+    const hole = document.createElement('div');
+    hole.id = 'blackHole';
+    document.body.appendChild(hole);
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            hole.classList.add('active');
+        });
+    });
+
+    setTimeout(() => {
+        elements.forEach(el => {
+            el.style.display = 'none';
+        });
+        document.querySelector('.container').style.display = 'none';
+    }, 2800);
 }
