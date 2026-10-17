@@ -83,7 +83,6 @@ canvas#bgCanvas {
     box-shadow: 0 0 10px var(--accent-red);
 }
 
-/* ===== ПЛЕЙЛИСТ (в конце страницы) ===== */
 .playlist-widget {
     background: rgba(4, 5, 7, 0.92);
     border: 1px solid var(--accent-cyan);
@@ -138,7 +137,6 @@ canvas#bgCanvas {
     text-shadow: 1px 1px var(--accent-red);
 }
 
-/* --- Прогресс-бар --- */
 .playlist-progress {
     margin-bottom: 16px;
 }
@@ -473,30 +471,31 @@ h1 {
 .terminal-actions {
     display: flex;
     gap: 12px;
-    align-items: center;
-    margin-top: 15px;
     flex-wrap: wrap;
+    margin-top: 15px;
 }
 
-.secret-input {
-    background: transparent;
-    border: 1px solid var(--accent-cyan);
-    color: var(--accent-cyan);
-    padding: 10px 14px;
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    outline: none;
+.terminal-input {
     flex: 1;
-    min-width: 160px;
+    min-width: 180px;
+    background: rgba(0, 240, 255, 0.04);
+    border: 1px solid rgba(0, 240, 255, 0.35);
+    border-radius: 2px;
+    color: var(--accent-cyan);
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+    padding: 10px 14px;
+    outline: none;
     transition: all 0.2s ease;
 }
 
-.secret-input:focus {
+.terminal-input:focus {
     border-color: var(--accent-red);
-    box-shadow: 0 0 12px rgba(255, 59, 92, 0.35);
+    box-shadow: 0 0 14px rgba(255, 59, 92, 0.35);
 }
 
-.secret-input::placeholder {
+.terminal-input::placeholder {
     color: var(--text-dim);
 }
 
@@ -510,62 +509,12 @@ h1 {
     text-transform: uppercase;
     letter-spacing: 1px;
     transition: all 0.3s ease;
-    white-space: nowrap;
 }
 
 .btn:hover {
     background: var(--accent-cyan);
     color: #000;
     box-shadow: 0 0 12px var(--accent-cyan);
-}
-
-#blackHole {
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: radial-gradient(circle at 40% 40%, #111 0%, #000 70%);
-    transform: translate(-50%, -50%);
-    z-index: 99999;
-    pointer-events: none;
-    box-shadow:
-        0 0 0 0 rgba(0, 240, 255, 0.4),
-        0 0 40px 10px #000,
-        inset 0 0 30px #000;
-    transition: width 2.8s cubic-bezier(0.22, 1, 0.36, 1),
-                height 2.8s cubic-bezier(0.22, 1, 0.36, 1),
-                box-shadow 2.8s ease-out;
-}
-
-#blackHole.active {
-    width: 420px;
-    height: 420px;
-    box-shadow:
-        0 0 120px 60px rgba(0, 0, 0, 0.95),
-        0 0 200px 90px rgba(255, 59, 92, 0.25),
-        0 0 280px 140px rgba(0, 240, 255, 0.15),
-        inset 0 0 100px #000;
-}
-
-.bh-flying {
-    position: fixed !important;
-    margin: 0 !important;
-    transition: transform 2.6s cubic-bezier(0.4, 0, 0.2, 1),
-                opacity 2.4s ease-in,
-                filter 2.4s ease-in !important;
-    z-index: 10000;
-    will-change: transform, opacity;
-}
-
-body.blackhole-mode {
-    overflow: hidden !important;
-    background: #000 !important;
-}
-
-body.blackhole-mode .container {
-    pointer-events: none;
 }
 
 .heart-accent {
@@ -582,6 +531,91 @@ body.blackhole-mode .container {
     50% {
         transform: scale(1.25);
     }
+}
+
+.suck-element {
+    transition-property: transform, opacity, filter !important;
+    transition-timing-function: cubic-bezier(0.55, 0, 0.85, 0.3) !important;
+    will-change: transform, opacity;
+    pointer-events: none !important;
+}
+
+.black-hole {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border-radius: 50%;
+    background: #000;
+    z-index: 1001;
+    pointer-events: none;
+    opacity: 0;
+    animation: blackHoleGrow 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) forwards 1.9s;
+}
+
+.black-hole::before {
+    content: '';
+    position: absolute;
+    inset: -34px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 240, 255, 0.7);
+    box-shadow:
+        0 0 45px 12px rgba(0, 240, 255, 0.35),
+        inset 0 0 30px rgba(255, 59, 92, 0.35);
+    animation: holeSpin 5s linear infinite, ringPulse 3s ease-in-out infinite;
+}
+
+.black-hole::after {
+    content: '';
+    position: absolute;
+    inset: -75px;
+    border-radius: 50%;
+    border: 1px dashed rgba(255, 59, 92, 0.45);
+    animation: holeSpin 9s linear infinite reverse;
+}
+
+@keyframes blackHoleGrow {
+    0% { transform: scale(0.1); opacity: 0; }
+    25% { opacity: 1; }
+    100% { transform: scale(7); opacity: 1; }
+}
+
+@keyframes holeSpin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes ringPulse {
+    0%, 100% {
+        box-shadow:
+            0 0 45px 12px rgba(0, 240, 255, 0.35),
+            inset 0 0 30px rgba(255, 59, 92, 0.35);
+    }
+    50% {
+        box-shadow:
+            0 0 80px 28px rgba(255, 59, 92, 0.4),
+            inset 0 0 45px rgba(0, 240, 255, 0.45);
+    }
+}
+
+.black-hole-label {
+    position: fixed;
+    left: 50%;
+    bottom: 10%;
+    transform: translateX(-50%);
+    z-index: 1002;
+    pointer-events: none;
+    color: var(--accent-cyan);
+    font-size: 0.75rem;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: labelFade 1.6s ease forwards 3.4s;
+}
+
+@keyframes labelFade {
+    to { opacity: 1; }
 }
 
 footer {
