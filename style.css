@@ -470,6 +470,36 @@ h1 {
     font-size: 0.95rem;
 }
 
+.terminal-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.secret-input {
+    background: transparent;
+    border: 1px solid var(--accent-cyan);
+    color: var(--accent-cyan);
+    padding: 10px 14px;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    outline: none;
+    flex: 1;
+    min-width: 160px;
+    transition: all 0.2s ease;
+}
+
+.secret-input:focus {
+    border-color: var(--accent-red);
+    box-shadow: 0 0 12px rgba(255, 59, 92, 0.35);
+}
+
+.secret-input::placeholder {
+    color: var(--text-dim);
+}
+
 .btn {
     background: transparent;
     color: var(--accent-cyan);
@@ -480,13 +510,62 @@ h1 {
     text-transform: uppercase;
     letter-spacing: 1px;
     transition: all 0.3s ease;
-    margin-top: 15px;
+    white-space: nowrap;
 }
 
 .btn:hover {
     background: var(--accent-cyan);
     color: #000;
     box-shadow: 0 0 12px var(--accent-cyan);
+}
+
+#blackHole {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, #111 0%, #000 70%);
+    transform: translate(-50%, -50%);
+    z-index: 99999;
+    pointer-events: none;
+    box-shadow:
+        0 0 0 0 rgba(0, 240, 255, 0.4),
+        0 0 40px 10px #000,
+        inset 0 0 30px #000;
+    transition: width 2.8s cubic-bezier(0.22, 1, 0.36, 1),
+                height 2.8s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 2.8s ease-out;
+}
+
+#blackHole.active {
+    width: 420px;
+    height: 420px;
+    box-shadow:
+        0 0 120px 60px rgba(0, 0, 0, 0.95),
+        0 0 200px 90px rgba(255, 59, 92, 0.25),
+        0 0 280px 140px rgba(0, 240, 255, 0.15),
+        inset 0 0 100px #000;
+}
+
+.bh-flying {
+    position: fixed !important;
+    margin: 0 !important;
+    transition: transform 2.6s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 2.4s ease-in,
+                filter 2.4s ease-in !important;
+    z-index: 10000;
+    will-change: transform, opacity;
+}
+
+body.blackhole-mode {
+    overflow: hidden !important;
+    background: #000 !important;
+}
+
+body.blackhole-mode .container {
+    pointer-events: none;
 }
 
 .heart-accent {
