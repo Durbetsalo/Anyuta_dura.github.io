@@ -174,13 +174,13 @@ function revealSecret() {
 }
 
 // ==========================================
-// 3. CANVAS: 2D ПЫЛЬ -> 3D СИНГУЛЯРНОСТЬ
+// 3. CANVAS: СТРУКТУРИРОВАННАЯ 3D-СИНГУЛЯРНОСТЬ
 // ==========================================
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 let width, height, hw, hh;
 let holeMode = false;
-let holeTransition = 0; // 0..1 плавное нарастание черной дыры
+let holeTransition = 0;
 
 function resizeCanvas() {
     width = canvas.width = window.innerWidth;
@@ -191,38 +191,30 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// Базовые частицы фонового режима
-const baseParticles = Array.from({ length: 50 }, () => ({
+// Деликатный фоновый эмбиент до активации дыры
+const ambientParticles = Array.from({ length: 42 }, () => ({
     x: Math.random() * width,
     y: Math.random() * height,
-    size: Math.random() * 2 + 0.5,
-    speedX: (Math.random() - 0.5) * 0.4,
-    speedY: (Math.random() - 0.5) * 0.4,
-    opacity: Math.random() * 0.5 + 0.2
+    size: Math.random() * 2 + 0.6,
+    speedX: (Math.random() - 0.5) * 0.35,
+    speedY: (Math.random() - 0.5) * 0.35,
+    opacity: Math.random() * 0.4 + 0.15
 }));
 
-// Конфигурация 3D Сингулярности (из black_hole)
+// Конфигурация сингулярности
 const isMobile = window.innerWidth < 768;
-const DISK_PARTICLES = isMobile ? 1800 : 3800;
-const SPHERE_PARTICLES = isMobile ? 400 : 900;
-const TOTAL_BH_PARTICLES = DISK_PARTICLES + SPHERE_PARTICLES;
-const HORIZON_RADIUS = isMobile ? 65 : 85;
+const DISK_PARTICLES = isMobile ? 1900 : 4200;
+const INNER_WARP_PARTICLES = isMobile ? 250 : 550;
+const TOTAL_BH_PARTICLES = DISK_PARTICLES + INNER_WARP_PARTICLES;
+const HORIZON_RADIUS = isMobile ? 70 : 92;
 
-// Символы аккреционного диска (Bad Things / Grunge / Cyber)
-const bhChars = "†★✖◈ᛟ◬☠⛓01!?".split('');
-const bhCharsLen = bhChars.length;
+// Культовые draincore / cyber символы
+const drainChars = "†★✖💔🕷☠⛓🦇!?◈ᛟ".split('');
+const drainCharsLen = drainChars.length;
 
-const fontCache = new Array(61);
-for (let i = 0; i <= 60; i++) {
-    fontCache[i] = `bold ${i}px 'Consolas', 'Courier New', monospace`;
-}
-
-// Палитра сайта: Циан, Неоновый красный, Белый, Пурпурный
-function getAccretionColor(dist) {
-    if (dist < 35) return '#ff3b5c';      // внутренний горячий обод
-    if (dist < 110) return '#00f0ff';     // основной циан
-    if (dist < 180) return '#ffffff';     // фотонные всплески
-    return '#8b5cf6';                     // дальнее гравитационное свечение
+const fontCache = new Array(65);
+for (let i = 0; i <= 64; i++) {
+    fontCache[i] = `bold ${i}px 'Courier New', 'Consolas', monospace`;
 }
 
 const bhParticles = [];
@@ -231,37 +223,56 @@ for (let i = 0; i < TOTAL_BH_PARTICLES; i++) {
     bhRenderPool[i] = { x: 0, y: 0, z: 0, char: '', color: '', alpha: 1, font: '' };
 }
 
-// Генерация диска
+// Построение структурированного диска со спиральными рукавами
+const NUM_ARMS = 3;
+const SPIRAL_WINDING = 2.4;
+
 for (let i = 0; i < DISK_PARTICLES; i++) {
-    const r = HORIZON_RADIUS + 12 + Math.random() * (isMobile ? 240 : 380);
-    const dist = r - HORIZON_RADIUS;
+    // Нелинейное распределение радиуса: плотнее возле фотонной сферы, реже к периферии
+    const norm = Math.pow(Math.random(), 1.6);
+    const maxDist = isMobile ? 260 : 420;
+    const dist = 14 + norm * maxDist;
+    const r = HORIZON_RADIUS + dist;
+
+    // Привязка к логарифмическому спиральному рукаву с размытием
+    const armIndex = i % NUM_ARMS;
+    const armAngle = (armIndex * (Math.PI * 2 / NUM_ARMS));
+    const spiralAngle = Math.log(dist + 1) * SPIRAL_WINDING;
+    const dispersion = (Math.random() - 0.5) * 0.45;
+    const angle = armAngle + spiralAngle + dispersion;
+
+    // Расклешение толщины диска к краям (flared disk profile)
+    const flare = (dist / maxDist);
+    const yDisp = (Math.random() - 0.5) * (8 + flare * 28);
+
     bhParticles.push({
         r: r,
         dist: dist,
-        angle: Math.random() * Math.PI * 2,
-        y: (Math.random() - 0.5) * Math.max(0, (400 - r) / 25) * 14,
-        speed: Math.sqrt(280 / r),
-        char: bhChars[(Math.random() * bhCharsLen) | 0],
+        angle: angle,
+        y: yDisp,
+        // Кеплеровская скорость: внутренние слои движутся значительно быстрее
+        speed: Math.sqrt(340 / r) * 0.022,
+        char: drainChars[(Math.random() * drainCharsLen) | 0],
         type: 0,
-        color: getAccretionColor(dist)
+        baseHue: dist < 45 ? 0 : (dist < 140 ? 1 : (dist < 260 ? 2 : 3))
     });
 }
 
-// Генерация сферы горизонта событий
-for (let i = 0; i < SPHERE_PARTICLES; i++) {
+// Частицы горизонта событий (фотонная сфера)
+for (let i = 0; i < INNER_WARP_PARTICLES; i++) {
     bhParticles.push({
-        r: HORIZON_RADIUS + Math.random() * 8,
+        r: HORIZON_RADIUS + Math.random() * 4.5,
         theta: Math.random() * Math.PI * 2,
         phi: Math.acos(2 * Math.random() - 1),
-        char: bhChars[(Math.random() * bhCharsLen) | 0],
-        type: 1,
-        color: '#ff3b5c'
+        speed: 0.045 + Math.random() * 0.02,
+        char: drainChars[(Math.random() * drainCharsLen) | 0],
+        type: 1
     });
 }
 
-// Вращение мышью / тачем
-let targetRotX = 0.35, targetRotY = 0.6;
-let rotX = 0.35, rotY = 0.6;
+// Плавный drag с инерцией
+let targetRotX = 0.38, targetRotY = 0.52;
+let rotX = 0.38, rotY = 0.52;
 let isDragging = false;
 let prevX = 0, prevY = 0;
 
@@ -271,9 +282,10 @@ function startDrag(x, y) {
 }
 function moveDrag(x, y) {
     if (isDragging && holeMode) {
-        const sens = isMobile ? 0.007 : 0.004;
+        const sens = isMobile ? 0.0055 : 0.0035;
         targetRotY += (x - prevX) * sens;
         targetRotX += (y - prevY) * sens;
+        targetRotX = Math.max(-1.4, Math.min(1.4, targetRotX)); // защита от выворота
         prevX = x; prevY = y;
     }
 }
@@ -286,42 +298,72 @@ window.addEventListener('touchstart', e => startDrag(e.touches[0].clientX, e.tou
 window.addEventListener('touchmove', e => moveDrag(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
 window.addEventListener('touchend', stopDrag);
 
-let timeOffset = 0;
+// Генератор цвета с эффектом Доплера (кинематическое смещение спектра)
+function getDopplerColor(baseHue, vzNorm) {
+    // vzNorm > 0: движется к нам -> сине-зелёный сдвиг (acid lime / cyan / white)
+    // vzNorm < 0: удаляется -> красный/пурпурный гравитационный сдвиг
+    if (vzNorm > 0.45) return '#ffffff';
+    if (vzNorm > 0.15) return '#00ffff';
+    if (vzNorm > -0.15) {
+        if (baseHue === 0) return '#00ffff';
+        if (baseHue === 1) return '#ccff00';
+        return '#ff00ff';
+    }
+    if (vzNorm > -0.45) return '#ff007f';
+    return '#8a2be2';
+}
+
+// Аккуратные редкие глитчи
+let glitchCooldown = 0;
+let glitchSlice = null;
+
+function triggerMicroGlitch() {
+    if (Math.random() < 0.012 && glitchCooldown <= 0) {
+        glitchCooldown = 6;
+        glitchSlice = {
+            y: Math.random() * height,
+            h: 15 + Math.random() * 40,
+            shift: (Math.random() - 0.5) * 16
+        };
+    }
+    if (glitchCooldown > 0) {
+        glitchCooldown--;
+        if (glitchCooldown === 0) glitchSlice = null;
+    }
+}
+
+let time = 0;
 
 function animate() {
     requestAnimationFrame(animate);
 
+    // 1. Обычный фоновый режим до активации
     if (!holeMode) {
-        // Обычный фоновый режим
         ctx.fillStyle = '#08090c';
         ctx.fillRect(0, 0, width, height);
 
-        baseParticles.forEach(p => {
-            p.x += p.speedX;
-            p.y += p.speedY;
-            if (p.x < 0) p.x = width;
-            if (p.x > width) p.x = 0;
-            if (p.y < 0) p.y = height;
-            if (p.y > height) p.y = 0;
-
+        ambientParticles.forEach(p => {
+            p.x += p.speedX; p.y += p.speedY;
+            if (p.x < 0) p.x = width; if (p.x > width) p.x = 0;
+            if (p.y < 0) p.y = height; if (p.y > height) p.y = 0;
             ctx.fillStyle = `rgba(0, 240, 255, ${p.opacity})`;
             ctx.fillRect(p.x, p.y, p.size, p.size);
         });
         return;
     }
 
-    // РЕЖИМ СИНГУЛЯРНОСТИ (BLACK HOLE)
-    if (holeTransition < 1) holeTransition = Math.min(1, holeTransition + 0.015);
-    timeOffset += 0.05;
+    // 2. Режим Сингулярности
+    if (holeTransition < 1) holeTransition = Math.min(1, holeTransition + 0.012);
+    time += 0.02;
 
-    // Шлейф и темнота космоса
+    // Глубокий, чистый фон космоса без мыла
     ctx.globalAlpha = 1;
-    ctx.fillStyle = 'rgba(5, 4, 10, 0.42)';
+    ctx.fillStyle = 'rgba(4, 0, 8, 0.45)';
     ctx.fillRect(0, 0, width, height);
 
-    // Вращение диска
-    rotX += (targetRotX - rotX) * 0.08;
-    rotY += (targetRotY - rotY) * 0.08;
+    // Плавная интерполяция вращения камеры
+    rotX += (targetRotX - rotX) * 0.06;
+    rotY += (targetRotY - rotY) * 0.06;
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -334,51 +376,62 @@ function animate() {
     for (let i = 0; i < TOTAL_BH_PARTICLES; i++) {
         const p = bhParticles[i];
         let x, y, z;
+        let vx = 0, vz = 0;
 
         if (p.type === 0) {
-            p.angle -= p.speed * 0.018;
+            p.angle -= p.speed;
             x = Math.cos(p.angle) * p.r * holeTransition;
-            y = (p.y + Math.sin(timeOffset + p.r * 0.06) * 3) * holeTransition;
+            y = (p.y + Math.sin(time * 2 + p.r * 0.04) * 2.5) * holeTransition;
             z = Math.sin(p.angle) * p.r * holeTransition;
+
+            // Вектор орбитальной скорости для расчёта Доплера
+            vx = -Math.sin(p.angle);
+            vz = Math.cos(p.angle);
         } else {
-            p.theta -= 0.035;
+            p.theta -= p.speed;
             x = p.r * Math.sin(p.phi) * Math.cos(p.theta) * holeTransition;
             y = p.r * Math.sin(p.phi) * Math.sin(p.theta) * holeTransition;
             z = p.r * Math.cos(p.phi) * holeTransition;
+            vx = -Math.sin(p.theta);
+            vz = Math.cos(p.theta);
         }
 
-        // 3D вращение
+        // 3D поворот координат
         const x1 = x * cosY - z * sinY;
         const z1 = x * sinY + z * cosY;
         const y1 = y * cosX - z1 * sinX;
         const z2 = y * sinX + z1 * cosX;
 
-        const zDist = z2 + 500;
-        if (zDist < 10) continue;
+        // Поворот вектора скорости по оси взгляда (z2)
+        const vRotZ = (vx * sinY + vz * cosY) * cosX;
+
+        const zDist = z2 + 520;
+        if (zDist < 15) continue;
 
         const scale = 800 / zDist;
-        const glitch = (Math.random() > 0.992) ? (Math.random() - 0.5) * 16 : 0;
-        const screenX = hw + x1 * scale + glitch;
+        const screenX = hw + x1 * scale;
         const screenY = hh + y1 * scale;
 
-        if (screenX < -25 || screenX > width + 25 || screenY < -25 || screenY > height + 25) continue;
+        if (screenX < -30 || screenX > width + 30 || screenY < -30 || screenY > height + 30) continue;
 
-        let alpha = scale * 0.85;
-        if (alpha > 1) alpha = 1;
-        if (p.type === 0 && p.dist > 90) {
-            alpha = Math.max(0.05, alpha - (p.dist / 380));
+        // Оптическая плотность с учётом глубины и эффекта Доплера
+        const dopplerBoost = (vRotZ * 0.35);
+        let alpha = (scale * 0.7 + dopplerBoost) * (p.type === 0 ? 0.9 : 0.6);
+        if (p.type === 0 && p.dist > 100) {
+            alpha *= Math.max(0.08, 1 - (p.dist / (isMobile ? 260 : 420)));
         }
+        alpha = Math.max(0.05, Math.min(1, alpha));
 
-        let fontSize = (13 * scale) | 0;
-        if (fontSize < 4) fontSize = 4;
-        else if (fontSize > 60) fontSize = 60;
+        let fontSize = (12 * scale) | 0;
+        fontSize = Math.max(4, Math.min(60, fontSize));
 
         const item = bhRenderPool[activeCount++];
         item.x = screenX;
         item.y = screenY;
         item.z = z2;
-        item.char = (Math.random() > 0.99) ? bhChars[(Math.random() * bhCharsLen) | 0] : p.char;
-        item.color = p.color;
+        // Редкая мутация символа
+        item.char = (Math.random() > 0.994) ? drainChars[(Math.random() * drainCharsLen) | 0] : p.char;
+        item.color = (p.type === 1) ? '#00ffff' : getDopplerColor(p.baseHue, vRotZ);
         item.alpha = ((alpha * 10) | 0) / 10;
         item.font = fontCache[fontSize];
     }
@@ -386,17 +439,15 @@ function animate() {
     const renderList = bhRenderPool.slice(0, activeCount);
     renderList.sort((a, b) => b.z - a.z);
 
-    // Отрисовка центрального горизонта
-    const cz1 = 0;
-    const centerScale = 800 / 500;
+    const centerScale = 800 / 520;
     const centerX = hw;
-    const centerY = hh + (0 * cosX - cz1 * sinX) * centerScale;
+    const centerY = hh;
     const horizonSize = HORIZON_RADIUS * centerScale * holeTransition;
 
     let lastFont = null, lastColor = null, lastAlpha = null;
     let i = 0;
 
-    // 1. Отрисовка задних частиц (за сингулярностью)
+    // 1. Отрисовка дальних частиц диска (за чёрной дырой)
     while (i < activeCount && renderList[i].z > 0) {
         const item = renderList[i];
         if (lastFont !== item.font) { ctx.font = item.font; lastFont = item.font; }
@@ -406,33 +457,39 @@ function animate() {
         i++;
     }
 
-    // 2. Внешнее аккреционное свечение
+    // 2. Фотонное кольцо и аккреционная аура (строгая, без пересвеченного мыла)
     ctx.globalAlpha = 1;
-    const glow = ctx.createRadialGradient(centerX, centerY, horizonSize * 0.4, centerX, centerY, horizonSize * 1.9);
-    glow.addColorStop(0, 'rgba(0, 240, 255, 0.45)');
-    glow.addColorStop(0.3, 'rgba(255, 59, 92, 0.35)');
-    glow.addColorStop(0.7, 'rgba(139, 92, 246, 0.15)');
-    glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = glow;
+
+    // Очень мягкое тонкое свечение ореола
+    const halo = ctx.createRadialGradient(centerX, centerY, horizonSize * 0.92, centerX, centerY, horizonSize * 1.35);
+    halo.addColorStop(0, 'rgba(0, 240, 255, 0.45)');
+    halo.addColorStop(0.35, 'rgba(255, 0, 255, 0.2)');
+    halo.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = halo;
     ctx.beginPath();
-    ctx.arc(centerX, centerY, horizonSize * 1.9, 0, Math.PI * 2);
+    ctx.arc(centerX, centerY, horizonSize * 1.35, 0, Math.PI * 2);
     ctx.fill();
 
-    // 3. Чёрное ядро сингулярности (абсолютная пустота)
-    ctx.fillStyle = '#020205';
+    // 3. Абсолютно тёмное ядро горизонта событий (Schwarzwald Void)
+    ctx.fillStyle = '#020005';
     ctx.beginPath();
-    ctx.arc(centerX, centerY, horizonSize * 0.95, 0, Math.PI * 2);
+    ctx.arc(centerX, centerY, horizonSize * 0.98, 0, Math.PI * 2);
     ctx.fill();
 
-    // 4. Тонкое фотонное кольцо
-    ctx.strokeStyle = '#00f0ff';
-    ctx.lineWidth = 1.5;
-    ctx.shadowColor = '#00f0ff';
-    ctx.shadowBlur = 12;
+    // 4. Тончайшее резкое фотонное кольцо
+    ctx.strokeStyle = '#00ffff';
+    ctx.lineWidth = 1.2;
+    ctx.shadowColor = '#00ffff';
+    ctx.shadowBlur = 6;
     ctx.stroke();
-    ctx.shadowBlur = 0;
 
-    // 5. Отрисовка передних частиц (перед сингулярностью)
+    // Внутренняя субмиллиметровая окантовка (эффект линзирования)
+    ctx.strokeStyle = 'rgba(255, 0, 255, 0.6)';
+    ctx.lineWidth = 0.8;
+    ctx.shadowBlur = 0;
+    ctx.stroke();
+
+    // 5. Отрисовка передних частиц (перед горизонтом событий)
     while (i < activeCount) {
         const item = renderList[i];
         if (lastFont !== item.font) { ctx.font = item.font; lastFont = item.font; }
@@ -442,11 +499,11 @@ function animate() {
         i++;
     }
 
-    // Случайные фотонные вспышки в космосе
-    if (Math.random() > 0.5) {
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = Math.random() > 0.5 ? '#ff3b5c' : '#00f0ff';
-        ctx.fillRect(Math.random() * width, Math.random() * height, 2, 2);
+    // Редкий аккуратный сдвиг строки (Glitch Slice)
+    triggerMicroGlitch();
+    if (glitchSlice) {
+        const sliceData = ctx.getImageData(0, glitchSlice.y, width, glitchSlice.h);
+        ctx.putImageData(sliceData, glitchSlice.shift, glitchSlice.y);
     }
 }
 
@@ -482,14 +539,13 @@ function triggerBlackHole() {
         '.container footer'
     );
 
-    // Кинематографичное затягивание интерфейса в воронку
     targets.forEach(el => {
         const rect = el.getBoundingClientRect();
         const originX = centerX - rect.left;
         const originY = centerY - rect.top;
-        const rotations = 360 * (2 + Math.floor(Math.random() * 3));
-        const duration = 1.6 + Math.random() * 0.9;
-        const delay = Math.random() * 0.4;
+        const rotations = 360 * (2 + Math.floor(Math.random() * 2));
+        const duration = 1.5 + Math.random() * 0.7;
+        const delay = Math.random() * 0.3;
 
         el.classList.add('suck-element');
         el.style.transformOrigin = `${originX}px ${originY}px`;
@@ -499,21 +555,20 @@ function triggerBlackHole() {
         requestAnimationFrame(() => {
             el.style.transform = `rotate(${rotations}deg) scale(0)`;
             el.style.opacity = '0';
-            el.style.filter = 'brightness(3) blur(4px)';
+            el.style.filter = 'brightness(2.5) blur(3px)';
         });
     });
 
-    // Активируем режим Canvas 3D Чёрной дыры
     setTimeout(() => {
         holeMode = true;
 
-        // Показываем футуристичный HUD статус и подсказку
         const hud = document.createElement('div');
-        hud.className = 'singularity-hud';
+        hud.className = 'drain-hud';
         hud.innerHTML = `
-            <div class="hud-title">EVENT_HORIZON // ANYUTA</div>
-            <div class="hud-sub">SINGULARITY ACTIVE // КРУТИ И ЗАЖИМАЙ ЭКРАН</div>
+            <div class="drain-badge">[ EVENT_HORIZON // 0xANYUTA ]</div>
+            <div class="drain-title">SINGULARITY COLLAPSE</div>
+            <div class="drain-hint">† DRAG TO ROTATE 3D ORBIT †</div>
         `;
         document.body.append(hud);
-    }, 1400);
+    }, 1300);
 }
