@@ -565,9 +565,9 @@ function triggerBlackHole() {
         const hud = document.createElement('div');
         hud.className = 'drain-hud';
         hud.innerHTML = `
-            <div class="drain-badge">[ EVENT_HORIZON // 0xANYUTA ]</div>
-            <div class="drain-title">SINGULARITY COLLAPSE</div>
-            <div class="drain-hint">† DRAG TO ROTATE 3D ORBIT †</div>
+            <div class="drain-badge">ты глянь какая черная дыра</div>
+            <div class="drain-title">твои глаза и улыбка намного красивее этой черной дыры</div>
+            <div class="drain-hint">дизайн вдохновлен из научной статьи</div>
         `;
         document.body.append(hud);
     }, 1300);
