@@ -96,13 +96,12 @@
                 &gt; Нажми кнопку ниже, чтобы запустить расшифровку тайного файла...
             </div>
 
-            <button
-                class="btn"
-                type="button"
-                onclick="revealSecret()"
-            >
-                [ РАСШИФРОВАТЬ ]
-            </button>
+            <div class="terminal-actions">
+                <input type="text" id="secretInput" class="secret-input" placeholder="Введите код..." autocomplete="off" spellcheck="false">
+                <button class="btn" type="button" onclick="revealSecret()">
+                    [ РАСШИФРОВАТЬ ]
+                </button>
+            </div>
         </div>
 
         <!-- ===== ПЛЕЙЛИСТ // В КОНЦЕ СТРАНИЦЫ ===== -->
