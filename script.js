@@ -18,19 +18,45 @@ const particles = Array.from({ length: 45 }, () => ({
     opacity: Math.random() * 0.5 + 0.2
 }));
 
+let holeMode = false;
+
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#08090c';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+
     particles.forEach(p => {
+        if (holeMode) {
+            const dx = cx - p.x;
+            const dy = cy - p.y;
+            const dist = Math.hypot(dx, dy) || 1;
+
+            p.speedX += (dx / dist) * 0.22;
+            p.speedY += (dy / dist) * 0.22;
+            p.speedX *= 1.012;
+            p.speedY *= 1.012;
+
+            if (dist < 14) {
+                p.x = Math.random() * canvas.width;
+                p.y = Math.random() * canvas.height;
+                p.speedX = 0;
+                p.speedY = 0;
+                p.size = Math.random() * 2 + 0.5;
+            }
+        }
+
         p.x += p.speedX;
         p.y += p.speedY;
 
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
+        if (!holeMode) {
+            if (p.x < 0) p.x = canvas.width;
+            if (p.x > canvas.width) p.x = 0;
+            if (p.y < 0) p.y = canvas.height;
+            if (p.y > canvas.height) p.y = 0;
+        }
 
         ctx.fillStyle = `rgba(0, 240, 255, ${p.opacity})`;
         ctx.fillRect(p.x, p.y, p.size, p.size);
@@ -53,116 +79,114 @@ const progressBar = document.getElementById('progressBar');
 const currentTimeEl = document.getElementById('currentTime');
 const trackDurationEl = document.getElementById('trackDuration');
 
-
 const tracks = [
     {
         title: 'Brigeburner',
         subtitle: 'Bad thigs OST',
         src: 'music/Bad Things OST - Bridgeburner - 14-2208107384.mp3'
     },
-    
+
     {
         title: 'Evening',
         subtitle: 'Bad thigs OST',
         src: 'music/Bad Things OST - Evening - 17-2208109511.mp3'
     },
-    
+
     {
         title: 'Fighter',
         subtitle: 'Bad thigs OST',
         src: 'music/Bad Things OST - Fighter - 3-2208102146.mp3'
     },
 
-        {
+    {
         title: 'Ivans Song',
         subtitle: 'Bad thigs OST',
         src: 'music/Bad Things OST - Ivans Song - 18-2208110267.mp3'
     },
 
-        {
+    {
         title: 'Malignant',
         subtitle: 'Bad thigs OST',
         src: 'music/Bad Things OST - Malignant - 7-2208105479.mp3'
     },
 
-        {
+    {
         title: 'Lockers',
         subtitle: 'Bad thigs OST',
         src: 'music/tmpscdl_0f49dhvetmp5e71vmdwBad_Things_OST_Lockers_4_2208103838.mp3'
     },
 
-        {
+    {
         title: 'Saint Augustine',
         subtitle: 'Bad thigs OST',
         src: 'music/tmpscdl_1s1_6savtmpele7xx3_Bad_Things_OST_Saint_Augustine_8.mp3'
     },
 
-            {
+    {
         title: 'Shortwave',
         subtitle: 'Bad thigs OST',
         src: 'music/tmpscdl_2ex3_80qtmpdzc5bezyBad_Things_OST_Shortwave_2_2208101723.mp3'
     },
 
-            {
+    {
         title: 'watch out, here i',
         subtitle: 'Bad thigs OST',
         src: 'music/tmpscdl_572apvo_tmpm50tria2Bad_Things_OST_watch_out,_here_i.mp3'
     },
 
-            {
+    {
         title: 'there it goes',
         subtitle: 'Bad thigs OST',
         src: 'music/tmpscdl_6zl4b13ctmpx0nw48p_Bad_Things_OST_there_it_goes_6_2208104267.mp3'
     },
 
-            {
+    {
         title: 'No More Running',
         subtitle: 'Bad thigs OST',
         src: 'music/tmpscdl_8m3_r0bttmpinneju2zBad_Things_OST_No_More_Running_15.mp3'
     },
 
-            {
+    {
         title: 'made by Andrew',
         subtitle: 'Bad thigs OST',
         src: 'music/tmpscdl_9f8l6t44tmphvasxgj7Bad_Things_OST_made_by_Andrew_13.mp3'
     },
 
-            {
+    {
         title: 'Bloody Knuckles',
         subtitle: 'Bad thigs OST',
         src: 'music/tmpscdl_drtpgy7ctmpwuyj8okbBad_Things_OST_Bloody_Knuckles_12.mp3'
     },
 
-            {
+    {
         title: 'aaaaaannnnnndrreeeeewwwww',
         subtitle: 'Bad thigs OST',
         src: 'music/tmpscdl_gydiju2xtmp4bes8vaaBad_Things_OST_aaaaaannnnnndrreeeeewwwww.mp3'
     },
 
-            {
+    {
         title: 'X80',
         subtitle: 'Bad thigs OST',
         src: 'music/tmpscdl_hcgz7mytmpl0964eygBad_Things_OST_X80_16_2208109250.mp3'
     },
 
-            {
+    {
         title: 'Picking Scabs',
         subtitle: 'Bad thigs OST',
         src: 'music/tmpscdl_mbrzv1notmp05_7mj29Bad_Things_OST_Picking_Scabs_1_2208101420.mp3'
     },
 
-            {
+    {
         title: 'there it is',
         subtitle: 'Bad thigs OST',
         src: 'music/tmpscdl_tnruc1b9tmpt9iv1uz8Bad_Things_OST_there_it_is_5_2208104021.mp3'
     },
 
-            {
+    {
         title: 'Hes Here',
         subtitle: 'Bad thigs OST',
         src: 'music/tmpscdl_yuoopwi3tmpd2fk1hcqBad_Things_OST_Hes_Here_9_2208105896.mp3'
     },
-
 ];
 
 let currentTrackIndex = 0;
@@ -181,7 +205,7 @@ function formatTime(seconds) {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
 
-    return `\( {String(mins).padStart(2, '0')}: \){String(secs).padStart(2, '0')}`;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
 function renderPlaylist() {
@@ -349,7 +373,6 @@ nextTrackBtn.addEventListener('click', () => {
     selectTrack(currentTrackIndex + 1, true);
 });
 
-/* --- Перемотка --- */
 progressBar.addEventListener('input', () => {
     if (!audio.duration) {
         return;
@@ -384,12 +407,10 @@ audio.addEventListener('ended', () => {
 renderPlaylist();
 selectTrack(0);
 
-/* ===== ТЕРМИНАЛ // ТАЙПИНГ ===== */
-
 const messages = [
-    '> Сканирование данных... Объект: Анюта.',
-    '> Статус: Лучший напарник в Bad Things.',
-    '> Сообщение: С тобой играть в 1000 раз круче, чем с любым NPC (даже с Иваном)! Спасибо, что ты есть ✨'
+    '> Сканирование данных... найдена Анюта',
+    '> Мне с тобой очень хорошо',
+    '> спасибо за все, свинка'
 ];
 
 let msgIdx = 0;
@@ -416,78 +437,65 @@ function revealSecret() {
     typeChar();
 }
 
+const secretInput = document.getElementById('secretInput');
 let blackHoleTriggered = false;
 
-const secretInput = document.getElementById('secretInput');
-
 secretInput.addEventListener('input', () => {
-    if (blackHoleTriggered) return;
+    if (blackHoleTriggered) {
+        return;
+    }
+
     if (secretInput.value.trim().toLowerCase() === 'черная дыра') {
-        blackHoleTriggered = true;
-        createBlackHole();
+        triggerBlackHole();
     }
 });
 
-function createBlackHole() {
-    document.body.classList.add('blackhole-mode');
+function triggerBlackHole() {
+    blackHoleTriggered = true;
+    holeMode = true;
+    document.body.style.overflow = 'hidden';
+    secretInput.disabled = true;
 
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
 
-    const selectors = [
-        'header',
-        '.quote-box',
-        '.card',
-        '.terminal-box',
-        '.playlist-widget',
-        'footer',
-        'canvas#bgCanvas',
-        '.crt-overlay'
-    ];
+    const targets = document.querySelectorAll(
+        '.container header, ' +
+        '.container .quote-box, ' +
+        '.container .card, ' +
+        '.container .terminal-box, ' +
+        '.container .playlist-widget, ' +
+        '.container footer'
+    );
 
-    const elements = [];
-    selectors.forEach(sel => {
-        document.querySelectorAll(sel).forEach(el => elements.push(el));
-    });
-
-    elements.forEach((el, i) => {
+    targets.forEach(el => {
         const rect = el.getBoundingClientRect();
-        const elCenterX = rect.left + rect.width / 2;
-        const elCenterY = rect.top + rect.height / 2;
+        const originX = centerX - rect.left;
+        const originY = centerY - rect.top;
+        const rotations = 360 * (2 + Math.floor(Math.random() * 3));
+        const duration = 1.8 + Math.random() * 1.1;
+        const delay = Math.random() * 0.5;
 
-        el.classList.add('bh-flying');
-        el.style.left = rect.left + 'px';
-        el.style.top = rect.top + 'px';
-        el.style.width = rect.width + 'px';
-        el.style.height = rect.height + 'px';
-        el.style.transformOrigin = 'center center';
+        el.classList.add('suck-element');
+        el.style.transformOrigin = `${originX}px ${originY}px`;
+        el.style.transitionDuration = `${duration}s`;
+        el.style.transitionDelay = `${delay}s`;
 
-        void el.offsetWidth;
-
-        const dx = centerX - elCenterX;
-        const dy = centerY - elCenterY;
-        const spins = 2 + (i % 3);
-        const angle = spins * 360 * (i % 2 === 0 ? 1 : -1);
-
-        el.style.transform = `translate(${dx}px, \( {dy}px) rotate( \){angle}deg) scale(0.05)`;
-        el.style.opacity = '0';
-        el.style.filter = 'blur(12px) brightness(0.2)';
-    });
-
-    const hole = document.createElement('div');
-    hole.id = 'blackHole';
-    document.body.appendChild(hole);
-
-    requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-            hole.classList.add('active');
+            el.style.transform = `rotate(${rotations}deg) scale(0)`;
+            el.style.opacity = '0';
+            el.style.filter = 'brightness(3) blur(1px)';
         });
     });
 
     setTimeout(() => {
-        elements.forEach(el => {
-            el.style.display = 'none';
-        });
-        document.querySelector('.container').style.display = 'none';
-    }, 2800);
+        const hole = document.createElement('div');
+        hole.className = 'black-hole';
+        document.body.append(hole);
+
+        const label = document.createElement('div');
+        label.className = 'black-hole-label';
+        label.textContent = 'EVENT_HORIZON // ANYUTA';
+        document.body.append(label);
+    }, 2000);
 }
