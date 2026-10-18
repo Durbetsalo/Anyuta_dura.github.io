@@ -1,6 +1,3 @@
-// ==========================================
-// 1. АУДИОПЛЕЕР & ПЛЕЙЛИСТ
-// ==========================================
 const audio = document.getElementById('bgAudio');
 const audioBtn = document.getElementById('audioToggle');
 const currentTrackEl = document.getElementById('currentTrack');
@@ -144,9 +141,6 @@ audio.addEventListener('ended', () => selectTrack(currentTrackIndex + 1, true));
 renderPlaylist();
 selectTrack(0);
 
-// ==========================================
-// 2. СЕКРЕТ И ТЕРМИНАЛ
-// ==========================================
 const messages = [
     '> Сканирование данных... найдена Анюта',
     '> Мне с тобой очень хорошо',
@@ -173,13 +167,10 @@ function revealSecret() {
     typeChar();
 }
 
-// ==========================================
-// 3. CANVAS: СТРУКТУРИРОВАННАЯ 3D-СИНГУЛЯРНОСТЬ
-// ==========================================
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 let width, height, hw, hh;
-let holeMode = false;
+let cosmicMode = null;
 let holeTransition = 0;
 
 function resizeCanvas() {
@@ -191,7 +182,6 @@ function resizeCanvas() {
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// Деликатный фоновый эмбиент до активации дыры
 const ambientParticles = Array.from({ length: 42 }, () => ({
     x: Math.random() * width,
     y: Math.random() * height,
@@ -201,14 +191,12 @@ const ambientParticles = Array.from({ length: 42 }, () => ({
     opacity: Math.random() * 0.4 + 0.15
 }));
 
-// Конфигурация сингулярности
 const isMobile = window.innerWidth < 768;
 const DISK_PARTICLES = isMobile ? 1900 : 4200;
 const INNER_WARP_PARTICLES = isMobile ? 250 : 550;
 const TOTAL_BH_PARTICLES = DISK_PARTICLES + INNER_WARP_PARTICLES;
 const HORIZON_RADIUS = isMobile ? 70 : 92;
 
-// Культовые draincore / cyber символы
 const drainChars = "†★✖💔🕷☠⛓🦇!?◈ᛟ".split('');
 const drainCharsLen = drainChars.length;
 
@@ -223,25 +211,21 @@ for (let i = 0; i < TOTAL_BH_PARTICLES; i++) {
     bhRenderPool[i] = { x: 0, y: 0, z: 0, char: '', color: '', alpha: 1, font: '' };
 }
 
-// Построение структурированного диска со спиральными рукавами
 const NUM_ARMS = 3;
 const SPIRAL_WINDING = 2.4;
 
 for (let i = 0; i < DISK_PARTICLES; i++) {
-    // Нелинейное распределение радиуса: плотнее возле фотонной сферы, реже к периферии
     const norm = Math.pow(Math.random(), 1.6);
     const maxDist = isMobile ? 260 : 420;
     const dist = 14 + norm * maxDist;
     const r = HORIZON_RADIUS + dist;
 
-    // Привязка к логарифмическому спиральному рукаву с размытием
     const armIndex = i % NUM_ARMS;
     const armAngle = (armIndex * (Math.PI * 2 / NUM_ARMS));
     const spiralAngle = Math.log(dist + 1) * SPIRAL_WINDING;
     const dispersion = (Math.random() - 0.5) * 0.45;
     const angle = armAngle + spiralAngle + dispersion;
 
-    // Расклешение толщины диска к краям (flared disk profile)
     const flare = (dist / maxDist);
     const yDisp = (Math.random() - 0.5) * (8 + flare * 28);
 
@@ -250,7 +234,6 @@ for (let i = 0; i < DISK_PARTICLES; i++) {
         dist: dist,
         angle: angle,
         y: yDisp,
-        // Кеплеровская скорость: внутренние слои движутся значительно быстрее
         speed: Math.sqrt(340 / r) * 0.022,
         char: drainChars[(Math.random() * drainCharsLen) | 0],
         type: 0,
@@ -258,7 +241,6 @@ for (let i = 0; i < DISK_PARTICLES; i++) {
     });
 }
 
-// Частицы горизонта событий (фотонная сфера)
 for (let i = 0; i < INNER_WARP_PARTICLES; i++) {
     bhParticles.push({
         r: HORIZON_RADIUS + Math.random() * 4.5,
@@ -270,22 +252,150 @@ for (let i = 0; i < INNER_WARP_PARTICLES; i++) {
     });
 }
 
-// Плавный drag с инерцией
+const PIG_DISK_COUNT = isMobile ? 1800 : 3600;
+const PIG_BODY_COUNT = isMobile ? 1200 : 2200;
+const PIG_JET_COUNT = isMobile ? 400 : 900;
+const TOTAL_PIG_PARTICLES = PIG_DISK_COUNT + PIG_BODY_COUNT + PIG_JET_COUNT;
+
+const pigChars = "★♥♡✧✦🌸🐽✨❀🐾☽*･ﾟ".split('');
+const pigCharsLen = pigChars.length;
+
+const pigColors = ['#ffffff', '#00f0ff', '#ffb7c5', '#ff9ebb', '#ff69b4', '#e0bbff', '#d8bfd8'];
+
+const pigParticles = [];
+const pigRenderPool = new Array(TOTAL_PIG_PARTICLES);
+for (let i = 0; i < TOTAL_PIG_PARTICLES; i++) {
+    pigRenderPool[i] = { x: 0, y: 0, z: 0, char: '', color: '', alpha: 1, font: '' };
+}
+
+for (let i = 0; i < PIG_DISK_COUNT; i++) {
+    const norm = Math.pow(Math.random(), 1.4);
+    const dist = 35 + norm * (isMobile ? 260 : 420);
+    const r = HORIZON_RADIUS * 0.85 + dist;
+    const arm = i % 4;
+    const angle = (arm * Math.PI / 2) + Math.log(dist + 1) * 2.2 + (Math.random() - 0.5) * 0.4;
+    const yDisp = (Math.random() - 0.5) * (10 + (dist / 400) * 35);
+    pigParticles.push({
+        category: 0,
+        r: r,
+        dist: dist,
+        angle: angle,
+        y: yDisp,
+        speed: Math.sqrt(300 / r) * 0.02,
+        char: pigChars[(Math.random() * pigCharsLen) | 0],
+        color: pigColors[(Math.random() * pigColorsLen()) | 0]
+    });
+}
+
+for (let i = 0; i < PIG_BODY_COUNT; i++) {
+    const subType = Math.random();
+    let bx = 0, by = 0, bz = 0;
+    let bColor = '#ffb7c5';
+
+    if (subType < 0.6) {
+        const u = Math.random(), v = Math.random();
+        const th = u * 2 * Math.PI;
+        const ph = Math.acos(2 * v - 1);
+        const rad = Math.cbrt(Math.random()) * 65;
+        bx = rad * Math.sin(ph) * Math.cos(th) * 1.15;
+        by = rad * Math.sin(ph) * Math.sin(th) * 0.95;
+        bz = rad * Math.cos(ph) * 1.05;
+        bColor = (Math.random() > 0.4) ? '#ff9ebb' : '#ffb7c5';
+    } else if (subType < 0.76) {
+        const side = Math.random() > 0.5 ? 1 : -1;
+        const u = Math.random();
+        const baseEx = side * 44, baseEy = -48, baseEz = 18;
+        bx = baseEx + (Math.random() - 0.5) * 22 * (1 - u);
+        by = baseEy - u * 30;
+        bz = baseEz + (Math.random() - 0.5) * 16;
+        bColor = '#ff69b4';
+    } else if (subType < 0.90) {
+        const u = Math.random(), v = Math.random();
+        const th = u * 2 * Math.PI;
+        const ph = Math.acos(2 * v - 1);
+        const rad = Math.cbrt(Math.random()) * 26;
+        bx = rad * Math.sin(ph) * Math.cos(th) * 1.25;
+        by = 10 + rad * Math.sin(ph) * Math.sin(th) * 0.85;
+        bz = 54 + rad * Math.cos(ph) * 0.45;
+        bColor = '#ff69b4';
+    } else if (subType < 0.96) {
+        const side = Math.random() > 0.5 ? 1 : -1;
+        bx = side * 8 + (Math.random() - 0.5) * 5;
+        by = 10 + (Math.random() - 0.5) * 9;
+        bz = 66 + (Math.random() - 0.5) * 3;
+        bColor = '#3a001a';
+    } else {
+        const side = Math.random() > 0.5 ? 1 : -1;
+        bx = side * 28 + (Math.random() - 0.5) * 7;
+        by = -14 + (Math.random() - 0.5) * 7;
+        bz = 56 + (Math.random() - 0.5) * 5;
+        bColor = '#020005';
+    }
+
+    pigParticles.push({
+        category: 1,
+        bx: bx,
+        by: by,
+        bz: bz,
+        char: pigChars[(Math.random() * pigCharsLen) | 0],
+        color: bColor
+    });
+}
+
+for (let i = 0; i < PIG_JET_COUNT; i++) {
+    const dir = Math.random() > 0.5 ? 1 : -1;
+    const len = Math.pow(Math.random(), 1.2) * (isMobile ? 260 : 420);
+    const spread = (len / 420) * 36;
+    pigParticles.push({
+        category: 2,
+        dir: dir,
+        dist: len,
+        speed: 1.6 + Math.random() * 2.8,
+        spread: spread,
+        offsetTh: Math.random() * Math.PI * 2,
+        char: pigChars[(Math.random() * pigCharsLen) | 0],
+        color: Math.random() > 0.4 ? '#ffffff' : (Math.random() > 0.5 ? '#00f0ff' : '#e0bbff')
+    });
+}
+
+function pigColorsLen() { return pigColors.length; }
+
+const orbitPhrasesText = [
+    "Анюта хрюша",
+    "милейшая свинка",
+    "самая лучшая хрюшка",
+    "моя свинка",
+    "хрю-хрю",
+    "космическая свинка ♥",
+    "хрюшка Анюта",
+    "любимая свинка",
+    "хрю-хрю ✨"
+];
+
+const orbitPhrases = orbitPhrasesText.map((text, idx) => ({
+    text: text,
+    r: 160 + (idx * 34) + (Math.random() * 20),
+    angle: (idx * (Math.PI * 2 / orbitPhrasesText.length)) + Math.random() * 0.4,
+    speed: 0.007 + ((idx % 3) * 0.003),
+    yDisp: (Math.random() - 0.5) * 80,
+    color: ['#ffb7c5', '#ff9ebb', '#e0bbff', '#b3f5ff', '#ffffff', '#ffd1dc'][idx % 6]
+}));
+
 let targetRotX = 0.38, targetRotY = 0.52;
 let rotX = 0.38, rotY = 0.52;
 let isDragging = false;
 let prevX = 0, prevY = 0;
 
 function startDrag(x, y) {
-    if (!holeMode) return;
+    if (!cosmicMode) return;
     isDragging = true; prevX = x; prevY = y;
 }
 function moveDrag(x, y) {
-    if (isDragging && holeMode) {
+    if (isDragging && cosmicMode) {
         const sens = isMobile ? 0.0055 : 0.0035;
         targetRotY += (x - prevX) * sens;
         targetRotX += (y - prevY) * sens;
-        targetRotX = Math.max(-1.4, Math.min(1.4, targetRotX)); // защита от выворота
+        targetRotX = Math.max(-1.4, Math.min(1.4, targetRotX));
         prevX = x; prevY = y;
     }
 }
@@ -298,10 +408,7 @@ window.addEventListener('touchstart', e => startDrag(e.touches[0].clientX, e.tou
 window.addEventListener('touchmove', e => moveDrag(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
 window.addEventListener('touchend', stopDrag);
 
-// Генератор цвета с эффектом Доплера (кинематическое смещение спектра)
 function getDopplerColor(baseHue, vzNorm) {
-    // vzNorm > 0: движется к нам -> сине-зелёный сдвиг (acid lime / cyan / white)
-    // vzNorm < 0: удаляется -> красный/пурпурный гравитационный сдвиг
     if (vzNorm > 0.45) return '#ffffff';
     if (vzNorm > 0.15) return '#00ffff';
     if (vzNorm > -0.15) {
@@ -313,7 +420,6 @@ function getDopplerColor(baseHue, vzNorm) {
     return '#8a2be2';
 }
 
-// Аккуратные редкие глитчи
 let glitchCooldown = 0;
 let glitchSlice = null;
 
@@ -337,8 +443,7 @@ let time = 0;
 function animate() {
     requestAnimationFrame(animate);
 
-    // 1. Обычный фоновый режим до активации
-    if (!holeMode) {
+    if (!cosmicMode) {
         ctx.fillStyle = '#08090c';
         ctx.fillRect(0, 0, width, height);
 
@@ -352,178 +457,291 @@ function animate() {
         return;
     }
 
-    // 2. Режим Сингулярности
     if (holeTransition < 1) holeTransition = Math.min(1, holeTransition + 0.012);
     time += 0.02;
 
-    // Глубокий, чистый фон космоса без мыла
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = 'rgba(4, 0, 8, 0.45)';
-    ctx.fillRect(0, 0, width, height);
-
-    // Плавная интерполяция вращения камеры
     rotX += (targetRotX - rotX) * 0.06;
     rotY += (targetRotY - rotY) * 0.06;
-
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
 
     const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
     const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
 
-    let activeCount = 0;
+    if (cosmicMode === 'blackhole') {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = 'rgba(4, 0, 8, 0.45)';
+        ctx.fillRect(0, 0, width, height);
 
-    for (let i = 0; i < TOTAL_BH_PARTICLES; i++) {
-        const p = bhParticles[i];
-        let x, y, z;
-        let vx = 0, vz = 0;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
 
-        if (p.type === 0) {
-            p.angle -= p.speed;
-            x = Math.cos(p.angle) * p.r * holeTransition;
-            y = (p.y + Math.sin(time * 2 + p.r * 0.04) * 2.5) * holeTransition;
-            z = Math.sin(p.angle) * p.r * holeTransition;
+        let activeCount = 0;
 
-            // Вектор орбитальной скорости для расчёта Доплера
-            vx = -Math.sin(p.angle);
-            vz = Math.cos(p.angle);
-        } else {
-            p.theta -= p.speed;
-            x = p.r * Math.sin(p.phi) * Math.cos(p.theta) * holeTransition;
-            y = p.r * Math.sin(p.phi) * Math.sin(p.theta) * holeTransition;
-            z = p.r * Math.cos(p.phi) * holeTransition;
-            vx = -Math.sin(p.theta);
-            vz = Math.cos(p.theta);
+        for (let i = 0; i < TOTAL_BH_PARTICLES; i++) {
+            const p = bhParticles[i];
+            let x, y, z;
+            let vx = 0, vz = 0;
+
+            if (p.type === 0) {
+                p.angle -= p.speed;
+                x = Math.cos(p.angle) * p.r * holeTransition;
+                y = (p.y + Math.sin(time * 2 + p.r * 0.04) * 2.5) * holeTransition;
+                z = Math.sin(p.angle) * p.r * holeTransition;
+                vx = -Math.sin(p.angle);
+                vz = Math.cos(p.angle);
+            } else {
+                p.theta -= p.speed;
+                x = p.r * Math.sin(p.phi) * Math.cos(p.theta) * holeTransition;
+                y = p.r * Math.sin(p.phi) * Math.sin(p.theta) * holeTransition;
+                z = p.r * Math.cos(p.phi) * holeTransition;
+                vx = -Math.sin(p.theta);
+                vz = Math.cos(p.theta);
+            }
+
+            const x1 = x * cosY - z * sinY;
+            const z1 = x * sinY + z * cosY;
+            const y1 = y * cosX - z1 * sinX;
+            const z2 = y * sinX + z1 * cosX;
+
+            const vRotZ = (vx * sinY + vz * cosY) * cosX;
+            const zDist = z2 + 520;
+            if (zDist < 15) continue;
+
+            const scale = 800 / zDist;
+            const screenX = hw + x1 * scale;
+            const screenY = hh + y1 * scale;
+
+            if (screenX < -30 || screenX > width + 30 || screenY < -30 || screenY > height + 30) continue;
+
+            const dopplerBoost = (vRotZ * 0.35);
+            let alpha = (scale * 0.7 + dopplerBoost) * (p.type === 0 ? 0.9 : 0.6);
+            if (p.type === 0 && p.dist > 100) {
+                alpha *= Math.max(0.08, 1 - (p.dist / (isMobile ? 260 : 420)));
+            }
+            alpha = Math.max(0.05, Math.min(1, alpha));
+
+            let fontSize = (12 * scale) | 0;
+            fontSize = Math.max(4, Math.min(60, fontSize));
+
+            const item = bhRenderPool[activeCount++];
+            item.x = screenX;
+            item.y = screenY;
+            item.z = z2;
+            item.char = (Math.random() > 0.994) ? drainChars[(Math.random() * drainCharsLen) | 0] : p.char;
+            item.color = (p.type === 1) ? '#00ffff' : getDopplerColor(p.baseHue, vRotZ);
+            item.alpha = ((alpha * 10) | 0) / 10;
+            item.font = fontCache[fontSize];
         }
 
-        // 3D поворот координат
-        const x1 = x * cosY - z * sinY;
-        const z1 = x * sinY + z * cosY;
-        const y1 = y * cosX - z1 * sinX;
-        const z2 = y * sinX + z1 * cosX;
+        const renderList = bhRenderPool.slice(0, activeCount);
+        renderList.sort((a, b) => b.z - a.z);
 
-        // Поворот вектора скорости по оси взгляда (z2)
-        const vRotZ = (vx * sinY + vz * cosY) * cosX;
+        const centerScale = 800 / 520;
+        const centerX = hw;
+        const centerY = hh;
+        const horizonSize = HORIZON_RADIUS * centerScale * holeTransition;
 
-        const zDist = z2 + 520;
-        if (zDist < 15) continue;
+        let lastFont = null, lastColor = null, lastAlpha = null;
+        let i = 0;
 
-        const scale = 800 / zDist;
-        const screenX = hw + x1 * scale;
-        const screenY = hh + y1 * scale;
-
-        if (screenX < -30 || screenX > width + 30 || screenY < -30 || screenY > height + 30) continue;
-
-        // Оптическая плотность с учётом глубины и эффекта Доплера
-        const dopplerBoost = (vRotZ * 0.35);
-        let alpha = (scale * 0.7 + dopplerBoost) * (p.type === 0 ? 0.9 : 0.6);
-        if (p.type === 0 && p.dist > 100) {
-            alpha *= Math.max(0.08, 1 - (p.dist / (isMobile ? 260 : 420)));
+        while (i < activeCount && renderList[i].z > 0) {
+            const item = renderList[i];
+            if (lastFont !== item.font) { ctx.font = item.font; lastFont = item.font; }
+            if (lastColor !== item.color) { ctx.fillStyle = item.color; lastColor = item.color; }
+            if (lastAlpha !== item.alpha) { ctx.globalAlpha = item.alpha; lastAlpha = item.alpha; }
+            ctx.fillText(item.char, item.x, item.y);
+            i++;
         }
-        alpha = Math.max(0.05, Math.min(1, alpha));
 
-        let fontSize = (12 * scale) | 0;
-        fontSize = Math.max(4, Math.min(60, fontSize));
+        ctx.globalAlpha = 1;
 
-        const item = bhRenderPool[activeCount++];
-        item.x = screenX;
-        item.y = screenY;
-        item.z = z2;
-        // Редкая мутация символа
-        item.char = (Math.random() > 0.994) ? drainChars[(Math.random() * drainCharsLen) | 0] : p.char;
-        item.color = (p.type === 1) ? '#00ffff' : getDopplerColor(p.baseHue, vRotZ);
-        item.alpha = ((alpha * 10) | 0) / 10;
-        item.font = fontCache[fontSize];
+        const halo = ctx.createRadialGradient(centerX, centerY, horizonSize * 0.92, centerX, centerY, horizonSize * 1.35);
+        halo.addColorStop(0, 'rgba(0, 240, 255, 0.45)');
+        halo.addColorStop(0.35, 'rgba(255, 0, 255, 0.2)');
+        halo.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, horizonSize * 1.35, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#020005';
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, horizonSize * 0.98, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#00ffff';
+        ctx.lineWidth = 1.2;
+        ctx.shadowColor = '#00ffff';
+        ctx.shadowBlur = 6;
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(255, 0, 255, 0.6)';
+        ctx.lineWidth = 0.8;
+        ctx.shadowBlur = 0;
+        ctx.stroke();
+
+        while (i < activeCount) {
+            const item = renderList[i];
+            if (lastFont !== item.font) { ctx.font = item.font; lastFont = item.font; }
+            if (lastColor !== item.color) { ctx.fillStyle = item.color; lastColor = item.color; }
+            if (lastAlpha !== item.alpha) { ctx.globalAlpha = item.alpha; lastAlpha = item.alpha; }
+            ctx.fillText(item.char, item.x, item.y);
+            i++;
+        }
+
+        triggerMicroGlitch();
+        if (glitchSlice) {
+            const sliceData = ctx.getImageData(0, glitchSlice.y, width, glitchSlice.h);
+            ctx.putImageData(sliceData, glitchSlice.shift, glitchSlice.y);
+        }
+    } else if (cosmicMode === 'pigquasar') {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = 'rgba(10, 2, 14, 0.38)';
+        ctx.fillRect(0, 0, width, height);
+
+        const nebGrad = ctx.createRadialGradient(hw, hh, 40, hw, hh, Math.max(hw, hh));
+        nebGrad.addColorStop(0, 'rgba(255, 105, 180, 0.12)');
+        nebGrad.addColorStop(0.35, 'rgba(186, 85, 211, 0.08)');
+        nebGrad.addColorStop(0.7, 'rgba(0, 240, 255, 0.04)');
+        nebGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = nebGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        let activeCount = 0;
+
+        for (let i = 0; i < TOTAL_PIG_PARTICLES; i++) {
+            const p = pigParticles[i];
+            let x = 0, y = 0, z = 0;
+
+            if (p.category === 0) {
+                p.angle -= p.speed;
+                x = Math.cos(p.angle) * p.r * holeTransition;
+                y = (p.y + Math.sin(time * 2.2 + p.r * 0.03) * 3) * holeTransition;
+                z = Math.sin(p.angle) * p.r * holeTransition;
+            } else if (p.category === 1) {
+                const breathe = 1 + Math.sin(time * 3) * 0.04;
+                x = p.bx * breathe * holeTransition;
+                y = p.by * breathe * holeTransition;
+                z = p.bz * breathe * holeTransition;
+            } else if (p.category === 2) {
+                p.dist += p.speed;
+                if (p.dist > (isMobile ? 260 : 420)) p.dist = 20;
+                const curSpread = (p.dist / 420) * 36;
+                const jAng = p.offsetTh + time * 1.5;
+                x = Math.cos(jAng) * curSpread * holeTransition;
+                y = p.dir * p.dist * holeTransition;
+                z = Math.sin(jAng) * curSpread * holeTransition;
+            }
+
+            const x1 = x * cosY - z * sinY;
+            const z1 = x * sinY + z * cosY;
+            const y1 = y * cosX - z1 * sinX;
+            const z2 = y * sinX + z1 * cosX;
+
+            const zDist = z2 + 520;
+            if (zDist < 15) continue;
+
+            const scale = 800 / zDist;
+            const screenX = hw + x1 * scale;
+            const screenY = hh + y1 * scale;
+
+            if (screenX < -30 || screenX > width + 30 || screenY < -30 || screenY > height + 30) continue;
+
+            let alpha = scale * 0.75;
+            if (p.category === 0 && p.dist > 120) {
+                alpha *= Math.max(0.1, 1 - (p.dist / (isMobile ? 260 : 420)));
+            } else if (p.category === 2) {
+                alpha *= (1 - p.dist / 420) * 1.2;
+            }
+            alpha = Math.max(0.08, Math.min(1, alpha));
+
+            let fontSize = (p.category === 1 ? (subTypeSize(p.color) * scale) : (11 * scale)) | 0;
+            fontSize = Math.max(4, Math.min(60, fontSize));
+
+            const item = pigRenderPool[activeCount++];
+            item.x = screenX;
+            item.y = screenY;
+            item.z = z2;
+            item.char = (Math.random() > 0.995) ? pigChars[(Math.random() * pigCharsLen) | 0] : p.char;
+            item.color = p.color;
+            item.alpha = ((alpha * 10) | 0) / 10;
+            item.font = fontCache[fontSize];
+        }
+
+        const renderList = pigRenderPool.slice(0, activeCount);
+        renderList.sort((a, b) => b.z - a.z);
+
+        let lastFont = null, lastColor = null, lastAlpha = null;
+        for (let i = 0; i < activeCount; i++) {
+            const item = renderList[i];
+            if (lastFont !== item.font) { ctx.font = item.font; lastFont = item.font; }
+            if (lastColor !== item.color) { ctx.fillStyle = item.color; lastColor = item.color; }
+            if (lastAlpha !== item.alpha) { ctx.globalAlpha = item.alpha; lastAlpha = item.alpha; }
+            ctx.fillText(item.char, item.x, item.y);
+        }
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        orbitPhrases.forEach(ph => {
+            ph.angle -= ph.speed;
+            const px = Math.cos(ph.angle) * ph.r * holeTransition;
+            const py = (ph.yDisp + Math.sin(time + ph.r) * 12) * holeTransition;
+            const pz = Math.sin(ph.angle) * ph.r * holeTransition;
+
+            const px1 = px * cosY - pz * sinY;
+            const pz1 = px * sinY + pz * cosY;
+            const py1 = py * cosX - pz1 * sinX;
+            const pz2 = py * sinX + pz1 * cosX;
+
+            const pzDist = pz2 + 520;
+            if (pzDist < 20) return;
+
+            const pScale = 800 / pzDist;
+            const sX = hw + px1 * pScale;
+            const sY = hh + py1 * pScale;
+
+            if (sX < -150 || sX > width + 150 || sY < -50 || sY > height + 50) return;
+
+            let pFontSize = Math.max(8, Math.min(22, (13 * pScale) | 0));
+            ctx.font = `bold ${pFontSize}px 'Courier New', 'Consolas', monospace`;
+            ctx.fillStyle = ph.color;
+            ctx.globalAlpha = Math.max(0.15, Math.min(1, pScale * 0.85));
+            ctx.shadowColor = ph.color;
+            ctx.shadowBlur = 10;
+            ctx.fillText(ph.text, sX, sY);
+        });
+
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
     }
+}
 
-    const renderList = bhRenderPool.slice(0, activeCount);
-    renderList.sort((a, b) => b.z - a.z);
-
-    const centerScale = 800 / 520;
-    const centerX = hw;
-    const centerY = hh;
-    const horizonSize = HORIZON_RADIUS * centerScale * holeTransition;
-
-    let lastFont = null, lastColor = null, lastAlpha = null;
-    let i = 0;
-
-    // 1. Отрисовка дальних частиц диска (за чёрной дырой)
-    while (i < activeCount && renderList[i].z > 0) {
-        const item = renderList[i];
-        if (lastFont !== item.font) { ctx.font = item.font; lastFont = item.font; }
-        if (lastColor !== item.color) { ctx.fillStyle = item.color; lastColor = item.color; }
-        if (lastAlpha !== item.alpha) { ctx.globalAlpha = item.alpha; lastAlpha = item.alpha; }
-        ctx.fillText(item.char, item.x, item.y);
-        i++;
-    }
-
-    // 2. Фотонное кольцо и аккреционная аура (строгая, без пересвеченного мыла)
-    ctx.globalAlpha = 1;
-
-    // Очень мягкое тонкое свечение ореола
-    const halo = ctx.createRadialGradient(centerX, centerY, horizonSize * 0.92, centerX, centerY, horizonSize * 1.35);
-    halo.addColorStop(0, 'rgba(0, 240, 255, 0.45)');
-    halo.addColorStop(0.35, 'rgba(255, 0, 255, 0.2)');
-    halo.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = halo;
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, horizonSize * 1.35, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 3. Абсолютно тёмное ядро горизонта событий (Schwarzwald Void)
-    ctx.fillStyle = '#020005';
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, horizonSize * 0.98, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 4. Тончайшее резкое фотонное кольцо
-    ctx.strokeStyle = '#00ffff';
-    ctx.lineWidth = 1.2;
-    ctx.shadowColor = '#00ffff';
-    ctx.shadowBlur = 6;
-    ctx.stroke();
-
-    // Внутренняя субмиллиметровая окантовка (эффект линзирования)
-    ctx.strokeStyle = 'rgba(255, 0, 255, 0.6)';
-    ctx.lineWidth = 0.8;
-    ctx.shadowBlur = 0;
-    ctx.stroke();
-
-    // 5. Отрисовка передних частиц (перед горизонтом событий)
-    while (i < activeCount) {
-        const item = renderList[i];
-        if (lastFont !== item.font) { ctx.font = item.font; lastFont = item.font; }
-        if (lastColor !== item.color) { ctx.fillStyle = item.color; lastColor = item.color; }
-        if (lastAlpha !== item.alpha) { ctx.globalAlpha = item.alpha; lastAlpha = item.alpha; }
-        ctx.fillText(item.char, item.x, item.y);
-        i++;
-    }
-
-    // Редкий аккуратный сдвиг строки (Glitch Slice)
-    triggerMicroGlitch();
-    if (glitchSlice) {
-        const sliceData = ctx.getImageData(0, glitchSlice.y, width, glitchSlice.h);
-        ctx.putImageData(sliceData, glitchSlice.shift, glitchSlice.y);
-    }
+function subTypeSize(col) {
+    if (col === '#020005') return 16;
+    if (col === '#3a001a') return 14;
+    return 10;
 }
 
 animate();
 
-// ==========================================
-// 4. ТРИГГЕР ЗАСАСЫВАНИЯ
-// ==========================================
 const secretInput = document.getElementById('secretInput');
-let blackHoleTriggered = false;
+let cosmicTriggered = false;
 
 secretInput.addEventListener('input', () => {
-    if (blackHoleTriggered) return;
-    if (secretInput.value.trim().toLowerCase() === 'черная дыра') {
-        triggerBlackHole();
+    if (cosmicTriggered) return;
+    const val = secretInput.value.trim().toLowerCase();
+    if (val === 'черная дыра') {
+        triggerCosmicEvent('blackhole');
+    } else if (val === 'ты свинка') {
+        triggerCosmicEvent('pigquasar');
     }
 });
 
-function triggerBlackHole() {
-    blackHoleTriggered = true;
+function triggerCosmicEvent(mode) {
+    cosmicTriggered = true;
     document.body.style.overflow = 'hidden';
     secretInput.disabled = true;
 
@@ -560,15 +778,26 @@ function triggerBlackHole() {
     });
 
     setTimeout(() => {
-        holeMode = true;
+        cosmicMode = mode;
 
-        const hud = document.createElement('div');
-        hud.className = 'drain-hud';
-        hud.innerHTML = `
-            <div class="drain-badge">ты глянь какая черная дыра</div>
-            <div class="drain-title">твои глаза и улыбка намного красивее этой черной дыры</div>
-            <div class="drain-hint">дизайн вдохновлен из научной статьи</div>
-        `;
-        document.body.append(hud);
+        if (mode === 'blackhole') {
+            const hud = document.createElement('div');
+            hud.className = 'drain-hud';
+            hud.innerHTML = `
+                <div class="drain-badge">ты глянь какая черная дыра</div>
+                <div class="drain-title">твои глаза и улыбка намного красивее этой черной дыры</div>
+                <div class="drain-hint">дизайн вдохновлен из научной статьи</div>
+            `;
+            document.body.append(hud);
+        } else if (mode === 'pigquasar') {
+            const hud = document.createElement('div');
+            hud.className = 'pig-hud';
+            hud.innerHTML = `
+                <div class="pig-badge">✦ КОСМИЧЕСКИЙ КВАЗАР ✦</div>
+                <div class="pig-title">АНЮТА — МОЯ ЛЮБИМАЯ СВИНКА</div>
+                <div class="pig-hint">хрю-хрю сквозь пространство и время</div>
+            `;
+            document.body.append(hud);
+        }
     }, 1300);
 }
