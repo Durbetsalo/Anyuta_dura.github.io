@@ -74,11 +74,12 @@ function updatePlaylist() {
     playlistStatus.textContent = playing ? 'ВОСПРОИЗВЕДЕНИЕ' : 'ОЖИДАНИЕ';
     playlistStatus.classList.toggle('is-playing', playing);
 
-    Array.from(playlistTracks.children).forEach((button, index) => {
-        const active = index === currentTrackIndex;
-        button.classList.toggle('active', active);
-        button.querySelector('.playlist-track-icon').textContent = active && playing ? '❚❚' : '►';
-    });
+    const children = playlistTracks.children;
+    for (let i = 0; i < children.length; i++) {
+        const active = i === currentTrackIndex;
+        children[i].classList.toggle('active', active);
+        children[i].querySelector('.playlist-track-icon').textContent = active && playing ? '❚❚' : '►';
+    }
 }
 
 function updateProgress() {
@@ -176,8 +177,8 @@ let holeTransition = 0;
 function resizeCanvas() {
     width = canvas.width = window.innerWidth;
     height = canvas.height = window.innerHeight;
-    hw = width / 2;
-    hh = height / 2;
+    hw = width * 0.5;
+    hh = height * 0.5;
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
@@ -192,8 +193,8 @@ const ambientParticles = Array.from({ length: 42 }, () => ({
 }));
 
 const isMobile = window.innerWidth < 768;
-const DISK_PARTICLES = isMobile ? 1900 : 4200;
-const INNER_WARP_PARTICLES = isMobile ? 250 : 550;
+const DISK_PARTICLES = isMobile ? 1200 : 2600;
+const INNER_WARP_PARTICLES = isMobile ? 180 : 380;
 const TOTAL_BH_PARTICLES = DISK_PARTICLES + INNER_WARP_PARTICLES;
 const HORIZON_RADIUS = isMobile ? 70 : 92;
 
@@ -202,14 +203,11 @@ const drainCharsLen = drainChars.length;
 
 const fontCache = new Array(65);
 for (let i = 0; i <= 64; i++) {
-    fontCache[i] = `bold ${i}px 'Courier New', 'Consolas', monospace`;
+    fontCache[i] = `bold ${i}px monospace`;
 }
 
 const bhParticles = [];
-const bhRenderPool = new Array(TOTAL_BH_PARTICLES);
-for (let i = 0; i < TOTAL_BH_PARTICLES; i++) {
-    bhRenderPool[i] = { x: 0, y: 0, z: 0, char: '', color: '', alpha: 1, font: '' };
-}
+const bhRenderList = [];
 
 const NUM_ARMS = 3;
 const SPIRAL_WINDING = 2.4;
@@ -219,14 +217,12 @@ for (let i = 0; i < DISK_PARTICLES; i++) {
     const maxDist = isMobile ? 260 : 420;
     const dist = 14 + norm * maxDist;
     const r = HORIZON_RADIUS + dist;
-
     const armIndex = i % NUM_ARMS;
-    const armAngle = (armIndex * (Math.PI * 2 / NUM_ARMS));
+    const armAngle = armIndex * (Math.PI * 2 / NUM_ARMS);
     const spiralAngle = Math.log(dist + 1) * SPIRAL_WINDING;
     const dispersion = (Math.random() - 0.5) * 0.45;
     const angle = armAngle + spiralAngle + dispersion;
-
-    const flare = (dist / maxDist);
+    const flare = dist / maxDist;
     const yDisp = (Math.random() - 0.5) * (8 + flare * 28);
 
     bhParticles.push({
@@ -252,28 +248,28 @@ for (let i = 0; i < INNER_WARP_PARTICLES; i++) {
     });
 }
 
-const PIG_DISK_COUNT = isMobile ? 1800 : 3600;
-const PIG_BODY_COUNT = isMobile ? 1200 : 2200;
-const PIG_JET_COUNT = isMobile ? 400 : 900;
+for (let i = 0; i < TOTAL_BH_PARTICLES; i++) {
+    bhRenderList.push({ x: 0, y: 0, z: 0, char: '', color: '', alpha: 1, font: '' });
+}
+
+const PIG_DISK_COUNT = isMobile ? 1100 : 2200;
+const PIG_BODY_COUNT = isMobile ? 800 : 1500;
+const PIG_JET_COUNT = isMobile ? 260 : 550;
 const TOTAL_PIG_PARTICLES = PIG_DISK_COUNT + PIG_BODY_COUNT + PIG_JET_COUNT;
 
 const pigChars = "★♥♡✧✦🌸🐽✨❀🐾☽*･ﾟ".split('');
 const pigCharsLen = pigChars.length;
-
 const pigColors = ['#ffffff', '#00f0ff', '#ffb7c5', '#ff9ebb', '#ff69b4', '#e0bbff', '#d8bfd8'];
 
 const pigParticles = [];
-const pigRenderPool = new Array(TOTAL_PIG_PARTICLES);
-for (let i = 0; i < TOTAL_PIG_PARTICLES; i++) {
-    pigRenderPool[i] = { x: 0, y: 0, z: 0, char: '', color: '', alpha: 1, font: '' };
-}
+const pigRenderList = [];
 
 for (let i = 0; i < PIG_DISK_COUNT; i++) {
     const norm = Math.pow(Math.random(), 1.4);
     const dist = 35 + norm * (isMobile ? 260 : 420);
     const r = HORIZON_RADIUS * 0.85 + dist;
     const arm = i % 4;
-    const angle = (arm * Math.PI / 2) + Math.log(dist + 1) * 2.2 + (Math.random() - 0.5) * 0.4;
+    const angle = (arm * Math.PI * 0.5) + Math.log(dist + 1) * 2.2 + (Math.random() - 0.5) * 0.4;
     const yDisp = (Math.random() - 0.5) * (10 + (dist / 400) * 35);
     pigParticles.push({
         category: 0,
@@ -283,19 +279,17 @@ for (let i = 0; i < PIG_DISK_COUNT; i++) {
         y: yDisp,
         speed: Math.sqrt(300 / r) * 0.02,
         char: pigChars[(Math.random() * pigCharsLen) | 0],
-        color: pigColors[(Math.random() * pigColorsLen()) | 0]
+        color: pigColors[(Math.random() * pigColors.length) | 0]
     });
 }
 
 for (let i = 0; i < PIG_BODY_COUNT; i++) {
     const subType = Math.random();
-    let bx = 0, by = 0, bz = 0;
-    let bColor = '#ffb7c5';
+    let bx = 0, by = 0, bz = 0, bColor = '#ffb7c5', bSize = 10;
 
     if (subType < 0.6) {
-        const u = Math.random(), v = Math.random();
-        const th = u * 2 * Math.PI;
-        const ph = Math.acos(2 * v - 1);
+        const th = Math.random() * Math.PI * 2;
+        const ph = Math.acos(2 * Math.random() - 1);
         const rad = Math.cbrt(Math.random()) * 65;
         bx = rad * Math.sin(ph) * Math.cos(th) * 1.15;
         by = rad * Math.sin(ph) * Math.sin(th) * 0.95;
@@ -304,15 +298,13 @@ for (let i = 0; i < PIG_BODY_COUNT; i++) {
     } else if (subType < 0.76) {
         const side = Math.random() > 0.5 ? 1 : -1;
         const u = Math.random();
-        const baseEx = side * 44, baseEy = -48, baseEz = 18;
-        bx = baseEx + (Math.random() - 0.5) * 22 * (1 - u);
-        by = baseEy - u * 30;
-        bz = baseEz + (Math.random() - 0.5) * 16;
+        bx = (side * 44) + (Math.random() - 0.5) * 22 * (1 - u);
+        by = -48 - u * 30;
+        bz = 18 + (Math.random() - 0.5) * 16;
         bColor = '#ff69b4';
     } else if (subType < 0.90) {
-        const u = Math.random(), v = Math.random();
-        const th = u * 2 * Math.PI;
-        const ph = Math.acos(2 * v - 1);
+        const th = Math.random() * Math.PI * 2;
+        const ph = Math.acos(2 * Math.random() - 1);
         const rad = Math.cbrt(Math.random()) * 26;
         bx = rad * Math.sin(ph) * Math.cos(th) * 1.25;
         by = 10 + rad * Math.sin(ph) * Math.sin(th) * 0.85;
@@ -324,12 +316,14 @@ for (let i = 0; i < PIG_BODY_COUNT; i++) {
         by = 10 + (Math.random() - 0.5) * 9;
         bz = 66 + (Math.random() - 0.5) * 3;
         bColor = '#3a001a';
+        bSize = 14;
     } else {
         const side = Math.random() > 0.5 ? 1 : -1;
         bx = side * 28 + (Math.random() - 0.5) * 7;
         by = -14 + (Math.random() - 0.5) * 7;
         bz = 56 + (Math.random() - 0.5) * 5;
         bColor = '#020005';
+        bSize = 16;
     }
 
     pigParticles.push({
@@ -337,28 +331,27 @@ for (let i = 0; i < PIG_BODY_COUNT; i++) {
         bx: bx,
         by: by,
         bz: bz,
+        baseSize: bSize,
         char: pigChars[(Math.random() * pigCharsLen) | 0],
         color: bColor
     });
 }
 
 for (let i = 0; i < PIG_JET_COUNT; i++) {
-    const dir = Math.random() > 0.5 ? 1 : -1;
-    const len = Math.pow(Math.random(), 1.2) * (isMobile ? 260 : 420);
-    const spread = (len / 420) * 36;
     pigParticles.push({
         category: 2,
-        dir: dir,
-        dist: len,
+        dir: Math.random() > 0.5 ? 1 : -1,
+        dist: Math.pow(Math.random(), 1.2) * (isMobile ? 260 : 420),
         speed: 1.6 + Math.random() * 2.8,
-        spread: spread,
         offsetTh: Math.random() * Math.PI * 2,
         char: pigChars[(Math.random() * pigCharsLen) | 0],
         color: Math.random() > 0.4 ? '#ffffff' : (Math.random() > 0.5 ? '#00f0ff' : '#e0bbff')
     });
 }
 
-function pigColorsLen() { return pigColors.length; }
+for (let i = 0; i < TOTAL_PIG_PARTICLES; i++) {
+    pigRenderList.push({ x: 0, y: 0, z: 0, char: '', color: '', alpha: 1, font: '' });
+}
 
 const orbitPhrasesText = [
     "Анюта хрюша",
@@ -446,14 +439,14 @@ function animate() {
     if (!cosmicMode) {
         ctx.fillStyle = '#08090c';
         ctx.fillRect(0, 0, width, height);
-
-        ambientParticles.forEach(p => {
+        for (let i = 0; i < ambientParticles.length; i++) {
+            const p = ambientParticles[i];
             p.x += p.speedX; p.y += p.speedY;
-            if (p.x < 0) p.x = width; if (p.x > width) p.x = 0;
-            if (p.y < 0) p.y = height; if (p.y > height) p.y = 0;
+            if (p.x < 0) p.x = width; else if (p.x > width) p.x = 0;
+            if (p.y < 0) p.y = height; else if (p.y > height) p.y = 0;
             ctx.fillStyle = `rgba(0, 240, 255, ${p.opacity})`;
             ctx.fillRect(p.x, p.y, p.size, p.size);
-        });
+        }
         return;
     }
 
@@ -478,8 +471,7 @@ function animate() {
 
         for (let i = 0; i < TOTAL_BH_PARTICLES; i++) {
             const p = bhParticles[i];
-            let x, y, z;
-            let vx = 0, vz = 0;
+            let x, y, z, vx = 0, vz = 0;
 
             if (p.type === 0) {
                 p.angle -= p.speed;
@@ -502,7 +494,6 @@ function animate() {
             const y1 = y * cosX - z1 * sinX;
             const z2 = y * sinX + z1 * cosX;
 
-            const vRotZ = (vx * sinY + vz * cosY) * cosX;
             const zDist = z2 + 520;
             if (zDist < 15) continue;
 
@@ -512,17 +503,17 @@ function animate() {
 
             if (screenX < -30 || screenX > width + 30 || screenY < -30 || screenY > height + 30) continue;
 
-            const dopplerBoost = (vRotZ * 0.35);
-            let alpha = (scale * 0.7 + dopplerBoost) * (p.type === 0 ? 0.9 : 0.6);
+            const vRotZ = (vx * sinY + vz * cosY) * cosX;
+            let alpha = (scale * 0.7 + (vRotZ * 0.35)) * (p.type === 0 ? 0.9 : 0.6);
             if (p.type === 0 && p.dist > 100) {
                 alpha *= Math.max(0.08, 1 - (p.dist / (isMobile ? 260 : 420)));
             }
             alpha = Math.max(0.05, Math.min(1, alpha));
 
             let fontSize = (12 * scale) | 0;
-            fontSize = Math.max(4, Math.min(60, fontSize));
+            fontSize = fontSize < 4 ? 4 : (fontSize > 60 ? 60 : fontSize);
 
-            const item = bhRenderPool[activeCount++];
+            const item = bhRenderList[activeCount++];
             item.x = screenX;
             item.y = screenY;
             item.z = z2;
@@ -532,19 +523,17 @@ function animate() {
             item.font = fontCache[fontSize];
         }
 
-        const renderList = bhRenderPool.slice(0, activeCount);
-        renderList.sort((a, b) => b.z - a.z);
+        bhRenderList.length = activeCount;
+        bhRenderList.sort((a, b) => b.z - a.z);
 
         const centerScale = 800 / 520;
-        const centerX = hw;
-        const centerY = hh;
         const horizonSize = HORIZON_RADIUS * centerScale * holeTransition;
 
         let lastFont = null, lastColor = null, lastAlpha = null;
         let i = 0;
 
-        while (i < activeCount && renderList[i].z > 0) {
-            const item = renderList[i];
+        while (i < activeCount && bhRenderList[i].z > 0) {
+            const item = bhRenderList[i];
             if (lastFont !== item.font) { ctx.font = item.font; lastFont = item.font; }
             if (lastColor !== item.color) { ctx.fillStyle = item.color; lastColor = item.color; }
             if (lastAlpha !== item.alpha) { ctx.globalAlpha = item.alpha; lastAlpha = item.alpha; }
@@ -553,19 +542,18 @@ function animate() {
         }
 
         ctx.globalAlpha = 1;
-
-        const halo = ctx.createRadialGradient(centerX, centerY, horizonSize * 0.92, centerX, centerY, horizonSize * 1.35);
+        const halo = ctx.createRadialGradient(hw, hh, horizonSize * 0.92, hw, hh, horizonSize * 1.35);
         halo.addColorStop(0, 'rgba(0, 240, 255, 0.45)');
         halo.addColorStop(0.35, 'rgba(255, 0, 255, 0.2)');
         halo.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = halo;
         ctx.beginPath();
-        ctx.arc(centerX, centerY, horizonSize * 1.35, 0, Math.PI * 2);
+        ctx.arc(hw, hh, horizonSize * 1.35, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.fillStyle = '#020005';
         ctx.beginPath();
-        ctx.arc(centerX, centerY, horizonSize * 0.98, 0, Math.PI * 2);
+        ctx.arc(hw, hh, horizonSize * 0.98, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.strokeStyle = '#00ffff';
@@ -580,7 +568,7 @@ function animate() {
         ctx.stroke();
 
         while (i < activeCount) {
-            const item = renderList[i];
+            const item = bhRenderList[i];
             if (lastFont !== item.font) { ctx.font = item.font; lastFont = item.font; }
             if (lastColor !== item.color) { ctx.fillStyle = item.color; lastColor = item.color; }
             if (lastAlpha !== item.alpha) { ctx.globalAlpha = item.alpha; lastAlpha = item.alpha; }
@@ -610,10 +598,12 @@ function animate() {
         ctx.textBaseline = 'middle';
 
         let activeCount = 0;
+        const breathe = (1 + Math.sin(time * 3) * 0.04) * holeTransition;
+        const maxJetDist = isMobile ? 260 : 420;
 
         for (let i = 0; i < TOTAL_PIG_PARTICLES; i++) {
             const p = pigParticles[i];
-            let x = 0, y = 0, z = 0;
+            let x = 0, y = 0, z = 0, fontSize = 11;
 
             if (p.category === 0) {
                 p.angle -= p.speed;
@@ -621,13 +611,13 @@ function animate() {
                 y = (p.y + Math.sin(time * 2.2 + p.r * 0.03) * 3) * holeTransition;
                 z = Math.sin(p.angle) * p.r * holeTransition;
             } else if (p.category === 1) {
-                const breathe = 1 + Math.sin(time * 3) * 0.04;
-                x = p.bx * breathe * holeTransition;
-                y = p.by * breathe * holeTransition;
-                z = p.bz * breathe * holeTransition;
-            } else if (p.category === 2) {
+                x = p.bx * breathe;
+                y = p.by * breathe;
+                z = p.bz * breathe;
+                fontSize = p.baseSize;
+            } else {
                 p.dist += p.speed;
-                if (p.dist > (isMobile ? 260 : 420)) p.dist = 20;
+                if (p.dist > maxJetDist) p.dist = 20;
                 const curSpread = (p.dist / 420) * 36;
                 const jAng = p.offsetTh + time * 1.5;
                 x = Math.cos(jAng) * curSpread * holeTransition;
@@ -651,31 +641,31 @@ function animate() {
 
             let alpha = scale * 0.75;
             if (p.category === 0 && p.dist > 120) {
-                alpha *= Math.max(0.1, 1 - (p.dist / (isMobile ? 260 : 420)));
+                alpha *= Math.max(0.1, 1 - (p.dist / maxJetDist));
             } else if (p.category === 2) {
                 alpha *= (1 - p.dist / 420) * 1.2;
             }
             alpha = Math.max(0.08, Math.min(1, alpha));
 
-            let fontSize = (p.category === 1 ? (subTypeSize(p.color) * scale) : (11 * scale)) | 0;
-            fontSize = Math.max(4, Math.min(60, fontSize));
+            let scaledFontSize = (fontSize * scale) | 0;
+            scaledFontSize = scaledFontSize < 4 ? 4 : (scaledFontSize > 60 ? 60 : scaledFontSize);
 
-            const item = pigRenderPool[activeCount++];
+            const item = pigRenderList[activeCount++];
             item.x = screenX;
             item.y = screenY;
             item.z = z2;
             item.char = (Math.random() > 0.995) ? pigChars[(Math.random() * pigCharsLen) | 0] : p.char;
             item.color = p.color;
             item.alpha = ((alpha * 10) | 0) / 10;
-            item.font = fontCache[fontSize];
+            item.font = fontCache[scaledFontSize];
         }
 
-        const renderList = pigRenderPool.slice(0, activeCount);
-        renderList.sort((a, b) => b.z - a.z);
+        pigRenderList.length = activeCount;
+        pigRenderList.sort((a, b) => b.z - a.z);
 
         let lastFont = null, lastColor = null, lastAlpha = null;
         for (let i = 0; i < activeCount; i++) {
-            const item = renderList[i];
+            const item = pigRenderList[i];
             if (lastFont !== item.font) { ctx.font = item.font; lastFont = item.font; }
             if (lastColor !== item.color) { ctx.fillStyle = item.color; lastColor = item.color; }
             if (lastAlpha !== item.alpha) { ctx.globalAlpha = item.alpha; lastAlpha = item.alpha; }
@@ -685,7 +675,8 @@ function animate() {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        orbitPhrases.forEach(ph => {
+        for (let i = 0; i < orbitPhrases.length; i++) {
+            const ph = orbitPhrases[i];
             ph.angle -= ph.speed;
             const px = Math.cos(ph.angle) * ph.r * holeTransition;
             const py = (ph.yDisp + Math.sin(time + ph.r) * 12) * holeTransition;
@@ -697,32 +688,25 @@ function animate() {
             const pz2 = py * sinX + pz1 * cosX;
 
             const pzDist = pz2 + 520;
-            if (pzDist < 20) return;
+            if (pzDist < 20) continue;
 
             const pScale = 800 / pzDist;
             const sX = hw + px1 * pScale;
             const sY = hh + py1 * pScale;
 
-            if (sX < -150 || sX > width + 150 || sY < -50 || sY > height + 50) return;
+            if (sX < -150 || sX > width + 150 || sY < -50 || sY > height + 50) continue;
 
-            let pFontSize = Math.max(8, Math.min(22, (13 * pScale) | 0));
-            ctx.font = `bold ${pFontSize}px 'Courier New', 'Consolas', monospace`;
+            let pFontSize = (13 * pScale) | 0;
+            pFontSize = pFontSize < 8 ? 8 : (pFontSize > 22 ? 22 : pFontSize);
+
+            ctx.font = `bold ${pFontSize}px monospace`;
             ctx.fillStyle = ph.color;
             ctx.globalAlpha = Math.max(0.15, Math.min(1, pScale * 0.85));
-            ctx.shadowColor = ph.color;
-            ctx.shadowBlur = 10;
             ctx.fillText(ph.text, sX, sY);
-        });
+        }
 
-        ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
     }
-}
-
-function subTypeSize(col) {
-    if (col === '#020005') return 16;
-    if (col === '#3a001a') return 14;
-    return 10;
 }
 
 animate();
@@ -745,8 +729,8 @@ function triggerCosmicEvent(mode) {
     document.body.style.overflow = 'hidden';
     secretInput.disabled = true;
 
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
+    const centerX = window.innerWidth * 0.5;
+    const centerY = window.innerHeight * 0.5;
 
     const targets = document.querySelectorAll(
         '.container header, ' +
@@ -757,7 +741,8 @@ function triggerCosmicEvent(mode) {
         '.container footer'
     );
 
-    targets.forEach(el => {
+    for (let i = 0; i < targets.length; i++) {
+        const el = targets[i];
         const rect = el.getBoundingClientRect();
         const originX = centerX - rect.left;
         const originY = centerY - rect.top;
@@ -775,7 +760,7 @@ function triggerCosmicEvent(mode) {
             el.style.opacity = '0';
             el.style.filter = 'brightness(2.5) blur(3px)';
         });
-    });
+    }
 
     setTimeout(() => {
         cosmicMode = mode;
@@ -794,7 +779,7 @@ function triggerCosmicEvent(mode) {
             hud.className = 'pig-hud';
             hud.innerHTML = `
                 <div class="pig-badge">✦ КОСМИЧЕСКИЙ КВАЗАР ✦</div>
-                <div class="pig-title">АНЮТА — МОЯ ЛЮБИМАЯ СВИНКА</div>
+                <div class="pig-title">хрю хрю Аня</div>
                 <div class="pig-hint">хрю-хрю сквозь пространство и время</div>
             `;
             document.body.append(hud);
