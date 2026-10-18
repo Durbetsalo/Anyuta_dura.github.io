@@ -207,7 +207,9 @@ for (let i = 0; i <= 64; i++) {
 }
 
 const bhParticles = [];
-const bhRenderList = [];
+const bhRenderList = Array.from({ length: TOTAL_BH_PARTICLES }, () => ({
+    x: 0, y: 0, z: 0, char: '', color: '', alpha: 1, font: ''
+}));
 
 const NUM_ARMS = 3;
 const SPIRAL_WINDING = 2.4;
@@ -248,10 +250,6 @@ for (let i = 0; i < INNER_WARP_PARTICLES; i++) {
     });
 }
 
-for (let i = 0; i < TOTAL_BH_PARTICLES; i++) {
-    bhRenderList.push({ x: 0, y: 0, z: 0, char: '', color: '', alpha: 1, font: '' });
-}
-
 const PIG_DISK_COUNT = isMobile ? 1100 : 2200;
 const PIG_BODY_COUNT = isMobile ? 800 : 1500;
 const PIG_JET_COUNT = isMobile ? 260 : 550;
@@ -262,7 +260,9 @@ const pigCharsLen = pigChars.length;
 const pigColors = ['#ffffff', '#00f0ff', '#ffb7c5', '#ff9ebb', '#ff69b4', '#e0bbff', '#d8bfd8'];
 
 const pigParticles = [];
-const pigRenderList = [];
+const pigRenderList = Array.from({ length: TOTAL_PIG_PARTICLES }, () => ({
+    x: 0, y: 0, z: 0, char: '', color: '', alpha: 1, font: ''
+}));
 
 for (let i = 0; i < PIG_DISK_COUNT; i++) {
     const norm = Math.pow(Math.random(), 1.4);
@@ -347,10 +347,6 @@ for (let i = 0; i < PIG_JET_COUNT; i++) {
         char: pigChars[(Math.random() * pigCharsLen) | 0],
         color: Math.random() > 0.4 ? '#ffffff' : (Math.random() > 0.5 ? '#00f0ff' : '#e0bbff')
     });
-}
-
-for (let i = 0; i < TOTAL_PIG_PARTICLES; i++) {
-    pigRenderList.push({ x: 0, y: 0, z: 0, char: '', color: '', alpha: 1, font: '' });
 }
 
 const orbitPhrasesText = [
@@ -523,8 +519,8 @@ function animate() {
             item.font = fontCache[fontSize];
         }
 
-        bhRenderList.length = activeCount;
-        bhRenderList.sort((a, b) => b.z - a.z);
+        const activeBH = bhRenderList.slice(0, activeCount);
+        activeBH.sort((a, b) => b.z - a.z);
 
         const centerScale = 800 / 520;
         const horizonSize = HORIZON_RADIUS * centerScale * holeTransition;
@@ -532,8 +528,8 @@ function animate() {
         let lastFont = null, lastColor = null, lastAlpha = null;
         let i = 0;
 
-        while (i < activeCount && bhRenderList[i].z > 0) {
-            const item = bhRenderList[i];
+        while (i < activeCount && activeBH[i].z > 0) {
+            const item = activeBH[i];
             if (lastFont !== item.font) { ctx.font = item.font; lastFont = item.font; }
             if (lastColor !== item.color) { ctx.fillStyle = item.color; lastColor = item.color; }
             if (lastAlpha !== item.alpha) { ctx.globalAlpha = item.alpha; lastAlpha = item.alpha; }
@@ -568,7 +564,7 @@ function animate() {
         ctx.stroke();
 
         while (i < activeCount) {
-            const item = bhRenderList[i];
+            const item = activeBH[i];
             if (lastFont !== item.font) { ctx.font = item.font; lastFont = item.font; }
             if (lastColor !== item.color) { ctx.fillStyle = item.color; lastColor = item.color; }
             if (lastAlpha !== item.alpha) { ctx.globalAlpha = item.alpha; lastAlpha = item.alpha; }
@@ -660,12 +656,12 @@ function animate() {
             item.font = fontCache[scaledFontSize];
         }
 
-        pigRenderList.length = activeCount;
-        pigRenderList.sort((a, b) => b.z - a.z);
+        const activePig = pigRenderList.slice(0, activeCount);
+        activePig.sort((a, b) => b.z - a.z);
 
         let lastFont = null, lastColor = null, lastAlpha = null;
         for (let i = 0; i < activeCount; i++) {
-            const item = pigRenderList[i];
+            const item = activePig[i];
             if (lastFont !== item.font) { ctx.font = item.font; lastFont = item.font; }
             if (lastColor !== item.color) { ctx.fillStyle = item.color; lastColor = item.color; }
             if (lastAlpha !== item.alpha) { ctx.globalAlpha = item.alpha; lastAlpha = item.alpha; }
