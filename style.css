@@ -718,3 +718,61 @@ footer {
     0%, 100% { opacity: 0.9; transform: scale(1); }
     50% { opacity: 0.45; transform: scale(0.98); }
 }
+
+
+
+
+.pig-hud {
+    position: fixed;
+    bottom: 5%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 1002;
+    pointer-events: none;
+    animation: pigHudFade 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    white-space: nowrap;
+}
+
+.pig-badge {
+    color: #ffb7c5;
+    font-size: clamp(11px, 1.6vw, 14px);
+    letter-spacing: 4px;
+    margin-bottom: 6px;
+    text-shadow: 0 0 10px rgba(255, 183, 197, 0.8);
+    font-weight: bold;
+}
+
+.pig-title {
+    color: #ff69b4;
+    font-size: clamp(16px, 3.2vw, 28px);
+    font-weight: 900;
+    letter-spacing: 6px;
+    text-shadow: 
+        2px 0 #00ffff, 
+        -2px 0 #ff1493, 
+        0 0 20px rgba(255, 105, 180, 0.85);
+    text-transform: uppercase;
+}
+
+.pig-hint {
+    margin-top: 8px;
+    color: #e0bbff;
+    font-size: clamp(9px, 1.4vw, 11px);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(224, 187, 255, 0.7);
+    opacity: 0.85;
+    animation: pulseHint 2.4s infinite ease-in-out;
+}
+
+@keyframes pigHudFade {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 25px) scale(0.92);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+}
