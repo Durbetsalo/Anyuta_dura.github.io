@@ -988,9 +988,9 @@ function triggerCosmicEvent(mode) {
             const hud = document.createElement('div');
             hud.className = 'magnetar-hud';
             hud.innerHTML = `
-                <div class="magnetar-badge">† SGR_0526-66 // DRAIN_MAGNETAR †</div>
-                <div class="magnetar-title">СВЕРХСИЛЬНОЕ ПОЛЕ 10¹¹ ТЕСЛА</div>
-                <div class="magnetar-hint">квантовый электродинамический разрыв пространства</div>
+                <div class="magnetar-badge">глянь скока всего тут</div>
+                <div class="magnetar-title">хрю хрю хрю</div>
+                <div class="magnetar-hint">Знакомство с тобой ощущалось так</div>
             `;
             document.body.append(hud);
         }
