@@ -145,9 +145,7 @@ selectTrack(0);
 const messages = [
     '> Сканирование данных... найдена Анюта',
     '> Мне с тобой очень хорошо',
-    '> спасибо за все, свинка',
-    '> я обожаю тебя',
-    
+    '> спасибо за все, свинка'
 ];
 let msgIdx = 0;
 let typingTimeout;
@@ -355,13 +353,12 @@ const orbitPhrasesText = [
     "Анюта хрюша",
     "милейшая свинка",
     "самая лучшая хрюшка",
+    "моя свинка",
     "хрю-хрю",
     "космическая свинка ♥",
     "хрюшка Анюта",
     "любимая свинка",
-    "хрю-хрю ✨",
-    "мама Ани",
-    "Аня главная свинья"
+    "хрю-хрю ✨"
 ];
 
 const orbitPhrases = orbitPhrasesText.map((text, idx) => ({
@@ -372,6 +369,64 @@ const orbitPhrases = orbitPhrasesText.map((text, idx) => ({
     yDisp: (Math.random() - 0.5) * 80,
     color: ['#ffb7c5', '#ff9ebb', '#e0bbff', '#b3f5ff', '#ffffff', '#ffd1dc'][idx % 6]
 }));
+
+const MAG_CORE_COUNT = isMobile ? 380 : 750;
+const MAG_FIELD_COUNT = isMobile ? 1300 : 2600;
+const MAG_BEAM_COUNT = isMobile ? 320 : 650;
+const TOTAL_MAG_PARTICLES = MAG_CORE_COUNT + MAG_FIELD_COUNT + MAG_BEAM_COUNT;
+
+const magChars = "⚡†☠ᛟ✕⛓🕷✦✖★◈!".split('');
+const magCharsLen = magChars.length;
+const magColors = ['#ffffff', '#00ffff', '#ff0055', '#ff00aa', '#9400d3', '#b026ff'];
+
+const magParticles = [];
+const magRenderList = Array.from({ length: TOTAL_MAG_PARTICLES }, () => ({
+    x: 0, y: 0, z: 0, char: '', color: '', alpha: 1, font: ''
+}));
+
+const NUM_FIELD_LOOPS = 22;
+for (let i = 0; i < MAG_FIELD_COUNT; i++) {
+    const loopIdx = i % NUM_FIELD_LOOPS;
+    const loopAngle = (loopIdx / NUM_FIELD_LOOPS) * Math.PI * 2 + (Math.random() - 0.5) * 0.15;
+    const loopMaxR = 60 + Math.pow(Math.random(), 1.4) * (isMobile ? 240 : 380);
+    const t = Math.random() * Math.PI;
+    magParticles.push({
+        category: 0,
+        loopAngle: loopAngle,
+        loopMaxR: loopMaxR,
+        t: t,
+        speed: 0.015 + Math.random() * 0.02,
+        char: magChars[(Math.random() * magCharsLen) | 0],
+        color: magColors[(Math.random() * magColors.length) | 0]
+    });
+}
+
+for (let i = 0; i < MAG_CORE_COUNT; i++) {
+    const th = Math.random() * Math.PI * 2;
+    const ph = Math.acos(2 * Math.random() - 1);
+    const rad = 28 + Math.random() * 6;
+    magParticles.push({
+        category: 1,
+        th: th,
+        ph: ph,
+        rad: rad,
+        speed: 0.04 + Math.random() * 0.03,
+        char: magChars[(Math.random() * magCharsLen) | 0],
+        color: Math.random() > 0.4 ? '#ffffff' : (Math.random() > 0.5 ? '#00ffff' : '#ff007f')
+    });
+}
+
+for (let i = 0; i < MAG_BEAM_COUNT; i++) {
+    magParticles.push({
+        category: 2,
+        dir: Math.random() > 0.5 ? 1 : -1,
+        dist: 30 + Math.random() * (isMobile ? 260 : 460),
+        speed: 3.5 + Math.random() * 5.0,
+        offsetTh: Math.random() * Math.PI * 2,
+        char: magChars[(Math.random() * magCharsLen) | 0],
+        color: Math.random() > 0.3 ? '#ffffff' : (Math.random() > 0.5 ? '#00ffff' : '#ff0055')
+    });
+}
 
 let targetRotX = 0.38, targetRotY = 0.52;
 let rotX = 0.38, rotY = 0.52;
@@ -705,6 +760,149 @@ function animate() {
         }
 
         ctx.globalAlpha = 1;
+    } else if (cosmicMode === 'magnetar') {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = 'rgba(6, 0, 10, 0.42)';
+        ctx.fillRect(0, 0, width, height);
+
+        const magGlow = ctx.createRadialGradient(hw, hh, 10, hw, hh, isMobile ? 280 : 440);
+        magGlow.addColorStop(0, 'rgba(255, 0, 128, 0.18)');
+        magGlow.addColorStop(0.3, 'rgba(148, 0, 211, 0.12)');
+        magGlow.addColorStop(0.65, 'rgba(0, 240, 255, 0.05)');
+        magGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = magGlow;
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        let activeCount = 0;
+        const maxBeamDist = isMobile ? 260 : 460;
+
+        for (let i = 0; i < TOTAL_MAG_PARTICLES; i++) {
+            const p = magParticles[i];
+            let x = 0, y = 0, z = 0, fontSize = 11;
+
+            if (p.category === 0) {
+                p.t += p.speed;
+                if (p.t > Math.PI) p.t = 0;
+                const sinT = Math.sin(p.t);
+                const cosT = Math.cos(p.t);
+                const rCur = p.loopMaxR * sinT;
+                x = rCur * Math.cos(p.loopAngle) * holeTransition;
+                z = rCur * Math.sin(p.loopAngle) * holeTransition;
+                y = cosT * p.loopMaxR * 0.72 * holeTransition;
+            } else if (p.category === 1) {
+                p.th += p.speed;
+                const pulse = 1 + Math.sin(time * 8 + p.ph * 2) * 0.08;
+                const curRad = p.rad * pulse;
+                x = curRad * Math.sin(p.ph) * Math.cos(p.th) * holeTransition;
+                y = curRad * Math.cos(p.ph) * holeTransition;
+                z = curRad * Math.sin(p.ph) * Math.sin(p.th) * holeTransition;
+                fontSize = 12;
+            } else {
+                p.dist += p.speed;
+                if (p.dist > maxBeamDist) p.dist = 30;
+                const spread = 4 + (p.dist / maxBeamDist) * 16;
+                const bAng = p.offsetTh + time * 3.5;
+                x = Math.cos(bAng) * spread * holeTransition;
+                y = p.dir * p.dist * holeTransition;
+                z = Math.sin(bAng) * spread * holeTransition;
+                fontSize = 10;
+            }
+
+            const x1 = x * cosY - z * sinY;
+            const z1 = x * sinY + z * cosY;
+            const y1 = y * cosX - z1 * sinX;
+            const z2 = y * sinX + z1 * cosX;
+
+            const zDist = z2 + 520;
+            if (zDist < 15) continue;
+
+            const scale = 800 / zDist;
+            const screenX = hw + x1 * scale;
+            const screenY = hh + y1 * scale;
+
+            if (screenX < -30 || screenX > width + 30 || screenY < -30 || screenY > height + 30) continue;
+
+            let alpha = scale * 0.8;
+            if (p.category === 0) {
+                alpha *= (0.35 + Math.sin(p.t) * 0.65);
+            } else if (p.category === 2) {
+                alpha *= (1 - p.dist / maxBeamDist) * 1.35;
+            }
+            alpha = Math.max(0.08, Math.min(1, alpha));
+
+            let scaledFontSize = (fontSize * scale) | 0;
+            scaledFontSize = scaledFontSize < 4 ? 4 : (scaledFontSize > 60 ? 60 : scaledFontSize);
+
+            const item = magRenderList[activeCount++];
+            item.x = screenX;
+            item.y = screenY;
+            item.z = z2;
+            item.char = (Math.random() > 0.992) ? magChars[(Math.random() * magCharsLen) | 0] : p.char;
+            item.color = p.color;
+            item.alpha = ((alpha * 10) | 0) / 10;
+            item.font = fontCache[scaledFontSize];
+        }
+
+        const activeMag = magRenderList.slice(0, activeCount);
+        activeMag.sort((a, b) => b.z - a.z);
+
+        const centerScale = 800 / 520;
+        const coreScreenRadius = 32 * centerScale * holeTransition;
+
+        let lastFont = null, lastColor = null, lastAlpha = null;
+        let i = 0;
+
+        while (i < activeCount && activeMag[i].z > 0) {
+            const item = activeMag[i];
+            if (lastFont !== item.font) { ctx.font = item.font; lastFont = item.font; }
+            if (lastColor !== item.color) { ctx.fillStyle = item.color; lastColor = item.color; }
+            if (lastAlpha !== item.alpha) { ctx.globalAlpha = item.alpha; lastAlpha = item.alpha; }
+            ctx.fillText(item.char, item.x, item.y);
+            i++;
+        }
+
+        ctx.globalAlpha = 1;
+        const coreGlow = ctx.createRadialGradient(hw, hh, coreScreenRadius * 0.2, hw, hh, coreScreenRadius * 1.8);
+        coreGlow.addColorStop(0, '#ffffff');
+        coreGlow.addColorStop(0.3, '#00ffff');
+        coreGlow.addColorStop(0.65, 'rgba(255, 0, 128, 0.55)');
+        coreGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = coreGlow;
+        ctx.beginPath();
+        ctx.arc(hw, hh, coreScreenRadius * 1.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(hw, hh, coreScreenRadius * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#00ffff';
+        ctx.lineWidth = 1.6;
+        ctx.shadowColor = '#ff00aa';
+        ctx.shadowBlur = 12;
+        ctx.stroke();
+
+        while (i < activeCount) {
+            const item = activeMag[i];
+            if (lastFont !== item.font) { ctx.font = item.font; lastFont = item.font; }
+            if (lastColor !== item.color) { ctx.fillStyle = item.color; lastColor = item.color; }
+            if (lastAlpha !== item.alpha) { ctx.globalAlpha = item.alpha; lastAlpha = item.alpha; }
+            ctx.fillText(item.char, item.x, item.y);
+            i++;
+        }
+
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+
+        triggerMicroGlitch();
+        if (glitchSlice) {
+            const sliceData = ctx.getImageData(0, glitchSlice.y, width, glitchSlice.h);
+            ctx.putImageData(sliceData, glitchSlice.shift, glitchSlice.y);
+        }
     }
 }
 
@@ -720,6 +918,8 @@ secretInput.addEventListener('input', () => {
         triggerCosmicEvent('blackhole');
     } else if (val === 'ты свинка') {
         triggerCosmicEvent('pigquasar');
+    } else if (val === 'магнитар') {
+        triggerCosmicEvent('magnetar');
     }
 });
 
@@ -735,6 +935,8 @@ function triggerCosmicEvent(mode) {
         '.container header, ' +
         '.container .quote-box, ' +
         '.container .card, ' +
+        '.container .photo-card, ' +
+        '.container .gallery-feed, ' +
         '.container .terminal-box, ' +
         '.container .playlist-widget, ' +
         '.container footer'
@@ -780,6 +982,15 @@ function triggerCosmicEvent(mode) {
                 <div class="pig-badge">✦ КОСМИЧЕСКИЙ КВАЗАР ✦</div>
                 <div class="pig-title">хрю хрю Аня</div>
                 <div class="pig-hint">хрю-хрю сквозь пространство и время</div>
+            `;
+            document.body.append(hud);
+        } else if (mode === 'magnetar') {
+            const hud = document.createElement('div');
+            hud.className = 'magnetar-hud';
+            hud.innerHTML = `
+                <div class="magnetar-badge">† SGR_0526-66 // DRAIN_MAGNETAR †</div>
+                <div class="magnetar-title">СВЕРХСИЛЬНОЕ ПОЛЕ 10¹¹ ТЕСЛА</div>
+                <div class="magnetar-hint">квантовый электродинамический разрыв пространства</div>
             `;
             document.body.append(hud);
         }
